@@ -14,6 +14,7 @@
             --bg-dark: #0d1b2a;
             --bg-panel: #1a1a1a;
             --text-light: #ccc;
+            --muted-color: #888;
         }
 
         body {
@@ -68,6 +69,7 @@
             font-weight: bold;
             font-size: 16px;
             position: relative;
+            cursor: pointer;
         }
         .nickname-display::after {
             content: 'Профиль';
@@ -171,22 +173,27 @@
         .admin-list div:last-child { border: none; }
         .role-admin { color: var(--admin-color); }
         .role-mod { color: var(--mod-color); }
-        .role-banned { color: var(--danger); text-decoration: line-through; }
+        .role-banned, .role-muted { color: var(--danger); text-decoration: line-through; }
 
         /* =============== ОСНОВНОЙ КОНТЕНТ =============== */
-        .main-content { flex-grow: 1; display: flex; padding-top: 80px; padding-bottom: 20px; box-sizing: border-box; }
-        .chat-container { width: 100%; max-width: 800px; margin: 0 auto; background: var(--bg-dark); border: 1px solid #444; border-radius: 8px; height: 70vh; display: flex; flex-direction: column; padding: 15px; box-sizing: border-box; overflow: hidden; }
+        .main-content {
+            flex-grow: 1; display: flex; padding-top: 80px; padding-bottom: 20px; box-sizing: border-box;
+        }
+        .chat-container {
+            width: 100%; max-width: 800px; margin: 0 auto; background: var(--bg-dark); border: 1px solid #444; border-radius: 8px; height: 70vh; display: flex; flex-direction: column; padding: 15px; box-sizing: border-box; overflow: hidden;
+        }
         .chat-messages { flex-grow: 1; overflow-y: auto; padding-right: 10px; margin-bottom: 15px; }
         .message { margin-bottom: 10px; padding: 8px 12px; border-radius: 15px; background: #162535; max-width: 80%; line-height: 1.4; position: relative; }
         .message.self { background: #007bff; align-self: flex-end; margin-left: auto; }
         .message.admin { border-left: 3px solid var(--admin-color); }
         .message.mod { border-left: 3px solid var(--mod-color); }
-        .message.banned { background: #330000; color: #888; }
+        .message.banned, .message.muted { background: #330000; color: #888; }
         .message .meta { font-size: 11px; color: #888; margin-bottom: 4px; }
         .message.self .meta { color: #cce5ff; }
         .chat-input-area { display: flex; gap: 10px; border-top: 1px solid #333; padding-top: 15px; }
         .chat-input-area input { flex-grow: 1; padding: 12px; background: #222; border: 1px solid #444; color: white; border-radius: 4px; }
         .chat-input-area button { padding: 0 20px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .chat-input-area input:disabled { background: #333; color: #666; cursor: not-allowed; }
 
         .profile-section { width: 100%; max-width: 600px; margin: 0 auto; display: none; }
         .profile-info { border: 1px solid #444; padding: 20px; border-radius: 8px; background: var(--bg-dark); margin-top: 30px; }
@@ -217,7 +224,7 @@
         </div>
     </div>
 
-    <!-- МОДАЛЬНОЕ ОКНО АВТОРИЗАЦИИ -->
+    <!-- МОДАЛЬНОЕ ОКНО -->
     <div class="modal-overlay" id="authModal">
         <div class="modal-box">
             <button class="modal-close" id="closeAuthModalBtn">&times;</button>
@@ -243,16 +250,32 @@
     <!-- АДМИН-ПАНЕЛЬ -->
     <div class="admin-panel" id="adminPanel">
         <h3>Панель Администрации</h3>
+        
+        <div class="admin-section">
+            <h4>Управление (Мут/Бан)</h4>
+            <input type="text" id="targetNickAdmin" placeholder="Введите никнейм" style="width: 100%; padding: 8px; margin-bottom: 10px;">
+            
+            <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+                <button class="admin-btn" style="flex:1;" id="btnMute">Заглушить (Mute)</button>
+                <button class="admin-btn" style="flex:1; background-color: var(--danger);" id="btnBan">Заблокировать (Ban)</button>
+            </div>
+
+            <select id="muteDuration" style="width: 100%; padding: 8px; margin-bottom: 10px;">
+                <option value="1">1 минута</option>
+                <option value="5">5 минут</option>
+                <option value="60">1 час</option>
+                <option value="1440">24 часа</option>
+                <option value="10000">100 часов</option>
+                <option value="720">Месяц</option>
+                <option value="-1">Навсегда</option>
+            </select>
+        </div>
+
         <div class="admin-section">
             <h4>Мониторинг пользователей</h4>
             <div class="admin-list" id="userMonitorList"></div>
         </div>
-        <div class="admin-section">
-            <h4>Управление (Бан)</h4>
-            <input type="text" id="banTargetNick" placeholder="Введите никнейм" style="width: 100%; padding: 8px; margin-bottom: 10px;">
-            <button class="admin-btn" style="background-color: var(--danger);" id="btnBan">Забанить</button>
-            <button class="admin-btn" style="background-color: var(--success);" id="btnUnban">Разбанить</button>
-        </div>
+
         <div class="admin-section">
             <h4>Администраторы</h4><div class="admin-list" id="adminList"></div>
         </div>
@@ -260,7 +283,13 @@
             <h4>Модераторы</h4><div class="admin-list" id="modList"></div>
         </div>
         <div class="admin-section">
-            <h4>Забаненные</h4><div class="admin-list" id="bannedList"></div>
+            <h4>Заблокированные (Бан)</h4><div class="admin-list" id="bannedList"></div>
+        </div>
+        <div class="admin-section">
+            <h4>Заглушенные (Мут)</h4><div class="admin-list" id="mutedList"></div>
+        </div>
+        <div class="admin-section">
+            <h4>Новые за 24ч</h4><div class="admin-list" id="newUsersList"></div>
         </div>
     </div>
 
@@ -323,12 +352,13 @@
 
         let db = {};
 
-        function loadDatabase() { const saved = localStorage.getItem('chessfluxDB'); db = saved ? JSON.parse(saved) : { users: {}, admins: ['chessflux'], mods: [], banned: [], registerDates: {}, userMeta: {} }; }
+        function loadDatabase() { const saved = localStorage.getItem('chessfluxDB'); db = saved ? JSON.parse(saved) : { users: {}, admins: ['chessflux'], mods: [], banned: [], muted: {}, registerDates: {}, userMeta: {} }; }
         function saveDatabase() { localStorage.setItem('chessfluxDB', JSON.stringify(db)); }
         
         function b64(str) { return btoa(unescape(encodeURIComponent(str))); }
         function deb64(str) { return decodeURIComponent(escape(atob(str))); }
 
+        /* ЭЛЕМЕНТЫ */
         const authModal = document.getElementById('authModal');
         const closeAuthModalBtn = document.getElementById('closeAuthModalBtn');
         const authBtn = document.getElementById('authBtn');
@@ -347,7 +377,7 @@
         loginTab.onclick = () => { loginTab.classList.add('active'); registerTab.classList.remove('active'); loginForm.classList.remove('hidden'); registerForm.classList.add('hidden'); };
         registerTab.onclick = () => { registerTab.classList.add('active'); loginTab.classList.remove('active'); registerForm.classList.remove('hidden'); loginForm.classList.add('hidden'); };
 
-        /* =============== РЕГИСТРАЦИЯ И ВХОД (АВТООТКРЫТИЕ) =============== */
+        /* =============== АВТОРИЗАЦИЯ (ИСПРАВЛЕНО) =============== */
         registerForm.onsubmit = (e) => {
             e.preventDefault(); loadDatabase();
             const nick = document.getElementById('regNick').value.toLowerCase();
@@ -360,7 +390,7 @@
             localStorage.setItem('chessfluxUser', JSON.stringify({ nick, isAdmin: db.admins.includes(nick), isMod: db.mods.includes(nick) }));
             authModal.classList.remove('show'); 
             showToast('Добро пожаловать!', 'success'); 
-            updateUIAfterAuth(true); // true = открыть профиль
+            updateUIAfterAuth(true); // Открыть профиль
         };
 
         loginForm.onsubmit = (e) => {
@@ -380,7 +410,7 @@
             localStorage.setItem('chessfluxUser', JSON.stringify({ nick, isAdmin: db.admins.includes(nick), isMod: db.mods.includes(nick) }));
             authModal.classList.remove('show'); 
             showToast('Вход выполнен', 'success'); 
-            updateUIAfterAuth(true); // true = открыть профиль
+            updateUIAfterAuth(true); // Открыть профиль
         };
 
         function updateUIAfterAuth(openProfile = false) {
@@ -393,7 +423,6 @@
                 
                 if (openProfile) {
                     currentView = 'profile';
-                    localStorage.setItem('chessfluxView', 'chat'); // Оставляем чат как базу, но переключаем визуально
                     chatContainer.style.display = 'none';
                     profileSection.style.display = 'block';
                     loadProfileData();
@@ -412,20 +441,23 @@
             profileSection.style.display = 'none'; chatContainer.style.display = 'flex';
         };
 
-        /* =============== ПРОФИЛЬ И ПАРОЛЬ =============== */
-        nicknameLink.onclick = () => { currentView = currentView === 'chat' ? 'profile' : 'chat'; localStorage.setItem('chessfluxView', currentView); if (currentView === 'profile') { chatContainer.style.display = 'none'; profileSection.style.display = 'block'; loadProfileData(); } else { chatContainer.style.display = 'flex'; profileSection.style.display = 'none'; renderChat(); } };
+        /* =============== КЛИК ПО НИКУ (ГЛАВНАЯ СТРАНИЦА) =============== */
+        nicknameLink.onclick = () => { 
+            currentView = 'chat'; 
+            localStorage.setItem('chessfluxView', 'chat');
+            chatContainer.style.display = 'flex'; 
+            profileSection.style.display = 'none'; 
+            renderChat(); 
+        };
 
+        /* =============== ПРОФИЛЬ И ПАРОЛЬ =============== */
         document.getElementById('changePassForm').onsubmit = (e) => {
             e.preventDefault(); loadDatabase();
             const userData = JSON.parse(localStorage.getItem('chessfluxUser'));
             const oldPass = b64(document.getElementById('oldPass').value);
             const newPass = b64(document.getElementById('newPass').value);
-            if (db.users[userData.nick] === oldPass) { 
-                db.users[userData.nick] = newPass; 
-                saveDatabase(); 
-                showToast('Пароль сменен', 'success'); 
-                document.getElementById('oldPass').value = ""; document.getElementById('newPass').value = "";
-            } else { showToast('Старый пароль неверен', 'error'); }
+            if (db.users[userData.nick] === oldPass) { db.users[userData.nick] = newPass; saveDatabase(); showToast('Пароль сменен', 'success'); }
+            else { showToast('Старый пароль неверен', 'error'); }
         };
 
         function loadProfileData() {
@@ -440,12 +472,54 @@
         }
 
         /* =============== ЧАТ =============== */
-        function renderChat() { chatMessages.innerHTML = ''; loadDatabase(); chatHistory.forEach(msg => { const div = document.createElement('div'); div.classList.add('message'); if (msg.nick === (JSON.parse(localStorage.getItem('chessfluxUser')) || {}).nick) div.classList.add('self'); if (db.banned.includes(msg.nick.toLowerCase())) div.classList.add('banned'); if (db.admins.includes(msg.nick.toLowerCase())) div.classList.add('admin'); if (db.mods.includes(msg.nick.toLowerCase())) div.classList.add('mod'); div.innerHTML = `<div class="meta">${msg.nick} • ${msg.time}</div>${msg.text}`; chatMessages.appendChild(div); }); chatMessages.scrollTop = chatMessages.scrollHeight; }
-        sendBtn.onclick = () => { loadDatabase(); const userData = JSON.parse(localStorage.getItem('chessfluxUser')); if (!userData) { showToast('Нужно войти', 'error'); return; } if (db.banned.includes(userData.nick.toLowerCase())) { showToast('Забанен', 'error'); return; } const text = chatInput.value.trim(); if (text === '') return; const message = { nick: userData.nick, text, time: new Date().toLocaleTimeString('ru-RU', {hour: '2-digit', minute:'2-digit'}) }; chatHistory.push(message); localStorage.setItem('chessfluxChat', JSON.stringify(chatHistory)); chatInput.value = ''; renderChat(); };
+        function renderChat() { 
+            chatMessages.innerHTML = ''; 
+            loadDatabase(); 
+            const userData = JSON.parse(localStorage.getItem('chessfluxUser'));
+            chatHistory.forEach(msg => {
+                const div = document.createElement('div');
+                div.classList.add('message');
+                if (msg.nick === (userData || {}).nick) div.classList.add('self');
+                if (db.banned.includes(msg.nick.toLowerCase()) || db.muted[msg.nick]) div.classList.add(msg.nick.toLowerCase() === userData?.nick?.toLowerCase() ? 'muted' : 'banned');
+                if (db.admins.includes(msg.nick.toLowerCase())) div.classList.add('admin');
+                if (db.mods.includes(msg.nick.toLowerCase())) div.classList.add('mod');
+                
+                let statusText = '';
+                if (db.banned.includes(msg.nick.toLowerCase())) statusText = ' [Заблокирован]';
+                if (db.muted[msg.nick]) statusText = ' [Заглушен]';
+
+                div.innerHTML = `<div class="meta">${msg.nick}${statusText} • ${msg.time}</div>${msg.text}`;
+                chatMessages.appendChild(div);
+            }); 
+            chatMessages.scrollTop = chatMessages.scrollHeight; 
+
+            // Блокировка ввода для замученных
+            const userDataChat = JSON.parse(localStorage.getItem('chessfluxUser'));
+            if (userDataChat && db.muted[userDataChat.nick]) {
+                chatInput.disabled = true;
+                chatInput.placeholder = 'Вы заглушены администратором.';
+            } else {
+                chatInput.disabled = false;
+                chatInput.placeholder = 'Написать в общий чат...';
+            }
+        }
+        sendBtn.onclick = () => { 
+            loadDatabase(); 
+            const userData = JSON.parse(localStorage.getItem('chessfluxUser')); 
+            if (!userData) { showToast('Нужно войти', 'error'); return; } 
+            if (db.banned.includes(userData.nick.toLowerCase()) || db.muted[userData.nick]) { showToast('Вы не можете писать', 'error'); return; } 
+            const text = chatInput.value.trim(); if (text === '') return; 
+            const message = { nick: userData.nick, text, time: new Date().toLocaleTimeString('ru-RU', {hour: '2-digit', minute:'2-digit'}) }; 
+            chatHistory.push(message); 
+            localStorage.setItem('chessfluxChat', JSON.stringify(chatHistory)); 
+            chatInput.value = ''; 
+            renderChat(); 
+        };
         chatInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendBtn.click(); } });
 
         /* =============== АДМИН-ПАНЕЛЬ =============== */
         adminMenuBtn.onclick = () => { loadDatabase(); if (JSON.parse(localStorage.getItem('chessfluxUser'))?.isAdmin) { adminPanel.style.display = adminPanel.style.display === 'flex' ? 'none' : 'flex'; renderAdminPanel(); } };
+        
         function renderAdminPanel() {
             const monitor = document.getElementById('userMonitorList'); monitor.innerHTML = '';
             Object.keys(db.users).forEach(nick => {
@@ -455,18 +529,64 @@
                 row.innerHTML = `<span><strong>${nick}</strong></span><span>Pass: ${passVisible}</span><span>IP: ${meta.ip}</span><span>Dev: ${meta.device}</span>`;
                 monitor.appendChild(row);
             });
+
             document.getElementById('adminList').innerHTML = db.admins.map(n => `<div>${n}</div>`).join('');
             document.getElementById('modList').innerHTML = db.mods.map(n => `<div>${n}</div>`).join('');
             document.getElementById('bannedList').innerHTML = db.banned.map(n => `<div>${n}</div>`).join('');
+            
+            const mutedList = Object.keys(db.muted).filter(n => !db.banned.includes(n));
+            document.getElementById('mutedList').innerHTML = mutedList.map(n => `<div>${n} (осталось: ${formatMuteTime(db.muted[n])})</div>`).join('');
+
+            const now = new Date();
+            const dayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+            const newUsers = Object.keys(db.registerDates).filter(nick => new Date(db.registerDates[nick]) > dayAgo);
+            document.getElementById('newUsersList').innerHTML = newUsers.map(n => `<div>${n}</div>`).join('');
         }
-        document.getElementById('btnBan').onclick = () => { loadDatabase(); const nick = document.getElementById('banTargetNick').value.toLowerCase(); if (nick && db.users[nick]) { if (!db.banned.includes(nick)) db.banned.push(nick); saveDatabase(); renderAdminPanel(); renderChat(); } };
-        document.getElementById('btnUnban').onclick = () => { loadDatabase(); const nick = document.getElementById('banTargetNick').value.toLowerCase(); db.banned = db.banned.filter(n => n !== nick); saveDatabase(); renderAdminPanel(); renderChat(); };
+
+        function formatMuteTime(timestamp) {
+            if (timestamp === -1) return 'Навсегда';
+            const now = Date.now();
+            const diff = timestamp - now;
+            if (diff <= 0) return 'Истек';
+            const mins = Math.floor(diff / 60000);
+            const hours = Math.floor(mins / 60);
+            const days = Math.floor(hours / 24);
+            if (days > 0) return `${d}д`;
+            if (hours > 0) return `${h}ч`;
+            return `${m}м`;
+        }
+
+        /* МУТ И БАН */
+        document.getElementById('btnMute').onclick = () => {
+            loadDatabase(); const nick = document.getElementById('targetNickAdmin').value.toLowerCase();
+            const durationMin = parseInt(document.getElementById('muteDuration').value);
+            if (nick && db.users[nick]) {
+                const now = Date.now();
+                let unmuteTime = -1;
+                if (durationMin !== -1) {
+                    unmuteTime = now + durationMin * 60 * 1000;
+                }
+                db.muted[nick] = unmuteTime;
+                saveDatabase();
+                renderAdminPanel();
+                renderChat();
+                showToast(`${nick} заглушен`, 'success');
+            }
+        };
+
+        document.getElementById('btnBan').onclick = () => {
+            loadDatabase(); const nick = document.getElementById('targetNickAdmin').value.toLowerCase();
+            if (nick && db.users[nick]) {
+                if (!db.banned.includes(nick)) db.banned.push(nick);
+                delete db.muted[nick]; // Снимаем мут при бане
+                saveDatabase();
+                renderAdminPanel();
+                renderChat();
+                showToast(`${nick} заблокирован`, 'success');
+            }
+        };
 
         /* =============== ЗАПУСК =============== */
         window.onload = () => { loadDatabase(); const userData = JSON.parse(localStorage.getItem('chessfluxUser')); if (userData) { updateUIAfterAuth(false); } else { authBtn.classList.remove('hidden'); chatContainer.style.display = 'flex'; profileSection.style.display = 'none'; } renderChat(); };
 
-        function showToast(msg, type) { const toast = document.createElement('div'); toast.className = `toast ${type}`; toast.innerText = msg; document.getElementById('toastContainer').appendChild(toast); toast.classList.add('show'); setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3000); }
-    </script>
-
-</body>
-</html>
+        function showToast(msg, type) { const toast = document.createElement('div'); toast.className = `toast ${type}`; toast.innerText = msg; document.getElementById('toastContainer').appendChild(toast); toast.classList.add('show'); setTimeout(() =>

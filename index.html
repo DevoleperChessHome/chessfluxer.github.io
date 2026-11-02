@@ -5,39 +5,40 @@
     <title>ChessFlux</title>
     <style>
         :root {
-            --primary: #007bff; --success: #4CAF50; --danger: #F44336; --admin: #FFD700; --mod: #4FC3F7;
-            --bg-dark: #0d1b2a; --bg-panel: #1a1a1a; --text-light: #ccc; --gold: #FFD700;
+            --primary: #007bff; --success: #4CAF50; --danger: #F44336; --admin: #FFD700; --mod: #4FC3F7; --dev: #9c27b0;
+            --bg-dark: #0d1b2a; --bg-panel: #1a1a1a; --text-light: #ccc; --muted: #888; --gold: #FFD700;
         }
         body { background:#000; margin:0; font-family:Arial; color:#fff; height:100vh; display:flex; flex-direction:column; }
         
-        /* === ШАПКА === */
         .top-nav { position:fixed; top:0; left:0; width:100%; height:60px; background:#111; display:flex; align-items:center; padding:0 20px; z-index:5000; }
         .logo { font-size:24px; font-weight:bold; color:#666; text-decoration:none; margin-right:40px; cursor:pointer; }
         .logo:hover { color:#fff; }
         .nav-menu { display:flex; gap:20px; list-style:none; margin:0; padding:0; }
         .nav-item { color:#ccc; text-decoration:none; font-size:15px; transition:color 0.2s; cursor:pointer; }
         .nav-item:hover { color:#fff; }
+        
         .user-panel { margin-left:auto; display:flex; gap:15px; align-items:center; }
-        .auth-btn, .logout-btn { background:#444; color:#fff; border:1px solid #666; padding:5px 12px; text-decoration:none; border-radius:4px; font-size:13px; cursor:pointer; }
+        .auth-btn, .logout-btn { background:#444; color:#fff; border:1px solid #666; padding:5px 12px; text-decoration:none; border-radius:4px; font-size:13px; cursor:pointer; display:none; }
         .auth-btn:hover, .logout-btn:hover { background:#555; }
-        .nickname-display { color:#4CAF50; text-decoration:none; font-weight:bold; font-size:16px; position:relative; cursor:pointer; }
+        
+        .nickname-display { color:#4CAF50; text-decoration:none; font-weight:bold; font-size:16px; position:relative; cursor:pointer; display:none; }
         .nickname-display::after { content:'Профиль'; position:absolute; bottom:-26px; left:50%; transform:translateX(-50%); background:#222; color:#fff; padding:4px 10px; border-radius:4px; font-size:12px; white-space:nowrap; opacity:0; transition:opacity 0.2s; pointer-events:none; box-shadow:0 2px 5px rgba(0,0,0,0.5); }
         .nickname-display:hover::after { opacity:1; }
-        .nickname-display.admin-label::after { content:'Создатель Сайта'; color:var(--gold); }
-        .admin-icon { color:var(--admin); font-size:20px; cursor:pointer; margin-right:15px; opacity:0.8; transition:opacity 0.2s; }
+        .nickname-display.admin-label::after { content:'Администрация'; color:var(--danger); }
+        .nickname-display.mod-label::after { content:'Модератор'; color:var(--mod); }
+        .nickname-display.dev-label::after { content:'Разработчик'; color:var(--dev); }
+        
+        .admin-icon { color:var(--admin); font-size:20px; cursor:pointer; margin-right:15px; opacity:0.8; transition:opacity 0.2s; display:none; }
         .admin-icon:hover { opacity:1; }
 
-        /* === ОСНОВНОЙ ЭКРАН === */
         .main-content { flex-grow:1; display:flex; padding-top:80px; padding-bottom:20px; box-sizing:border-box; overflow:hidden; }
         
-        /* === ГЛАВНАЯ СТРАНИЦА (ДАШБОРД) === */
         .dashboard { width:100%; max-width:1000px; margin:0 auto; display:none; flex-direction:column; gap:20px; }
         .dashboard h1 { text-align:center; color:var(--primary); }
         .stats-bar { display:flex; gap:20px; justify-content:center; }
         .stat-box { background:var(--bg-panel); padding:15px 25px; border-radius:8px; border:1px solid #444; text-align:center; }
         .stat-box span { display:block; font-size:24px; font-weight:bold; color:var(--primary); }
 
-        /* === ЧАТ === */
         .chat-container { width:100%; max-width:800px; margin:0 auto; background:var(--bg-dark); border:1px solid #444; border-radius:8px; height:70vh; display:flex; flex-direction:column; padding:15px; box-sizing:border-box; display:none; }
         .chat-messages { flex-grow:1; overflow-y:auto; padding-right:10px; margin-bottom:15px; }
         .message { margin-bottom:10px; padding:8px 12px; border-radius:15px; background:#162535; max-width:80%; line-height:1.4; }
@@ -46,21 +47,25 @@
         .chat-input-area input { flex-grow:1; padding:12px; background:#222; border:1px solid #444; color:#fff; border-radius:4px; }
         .chat-input-area button { padding:0 20px; background:var(--primary); color:#fff; border:none; border-radius:4px; cursor:pointer; }
 
-        /* === ПРОФИЛЬ === */
         .profile-section { width:100%; max-width:800px; margin:0 auto; display:none; }
         .profile-info { border:1px solid #444; padding:20px; border-radius:8px; background:var(--bg-dark); margin-top:30px; }
         .profile-games { margin-top:20px; }
         .game-item { padding:10px; border-bottom:1px dashed #333; display:flex; justify-content:space-between; }
 
-        /* === АДМИН-ПАНЕЛЬ === */
         .admin-panel { position:fixed; top:70px; right:20px; background:var(--bg-panel); border:1px solid #444; border-radius:8px; width:400px; max-height:80vh; overflow-y:auto; z-index:4000; display:none; flex-direction:column; box-shadow:0 10px 30px rgba(0,0,0,0.5); }
         .admin-panel h3 { margin:0; padding:15px; background:#222; border-bottom:1px solid #333; text-align:center; color:var(--admin); }
         .admin-section { padding:15px; }
         .admin-section h4 { margin-top:0; color:#ccc; font-size:14px; margin-bottom:10px; }
         .admin-list { font-size:12px; background:var(--bg-dark); padding:10px; border-radius:4px; }
-        .admin-list div { padding:6px 0; border-bottom:1px dashed #333; display:flex; justify-content:space-between; }
+        .admin-list div { padding:6px 0; border-bottom:1px dashed #333; display:flex; justify-content:space-between; align-items:center; }
+        .admin-list div button { background:none; border:none; color:var(--danger); font-size:18px; cursor:pointer; padding:0 5px; }
 
-        /* === МОДАЛЬНОЕ ОКНО === */
+        .game-section { width:100%; max-width:800px; margin:0 auto; display:none; }
+        .game-controls { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; }
+        .game-btn { padding:10px 20px; background:var(--primary); color:#fff; border:none; border-radius:6px; cursor:pointer; }
+        .challenges-list { margin-top:20px; }
+        .challenge-item { padding:10px; background:var(--bg-panel); border:1px solid #444; border-radius:6px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; }
+
         .modal-overlay { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); display:none; align-items:center; justify-content:center; z-index:6000; opacity:0; transition:opacity 0.2s; }
         .modal-overlay.show { opacity:1; display:flex; }
         .modal-box { background:var(--bg-panel); border:1px solid #444; border-radius:12px; width:90%; max-width:500px; padding:30px; position:relative; transform:scale(0.9); transition:transform 0.2s; }
@@ -72,13 +77,6 @@
         .form-group { margin-bottom:15px; }
         .form-group label { display:block; margin-bottom:5px; color:var(--text-light); }
         .form-group input { width:100%; padding:12px; background:#222; border:1px solid #444; color:#fff; border-radius:6px; }
-
-        /* === РАЗДЕЛ ИГРА === */
-        .game-section { width:100%; max-width:800px; margin:0 auto; display:none; }
-        .game-controls { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; }
-        .game-btn { padding:10px 20px; background:var(--primary); color:#fff; border:none; border-radius:6px; cursor:pointer; }
-        .challenges-list { margin-top:20px; }
-        .challenge-item { padding:10px; background:var(--bg-panel); border:1px solid #444; border-radius:6px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; }
     </style>
 </head>
 <body>
@@ -97,13 +95,12 @@
         <div class="user-panel">
             <span class="admin-icon" id="adminMenuBtn" title="Админ-панель">⚙️</span>
             <a href="#" id="authBtn" class="auth-btn">Войти</a>
-            <a href="#" id="nicknameLink" class="nickname-display hidden"></a>
-            <a href="#" id="logoutBtn" class="logout-btn hidden">Выйти</a>
+            <a href="#" id="nicknameLink" class="nickname-display"></a>
+            <a href="#" id="logoutBtn" class="logout-btn">Выйти</a>
         </div>
     </div>
 
     <div class="main-content">
-        <!-- ГЛАВНАЯ СТРАНИЦА -->
         <div class="dashboard" id="dashboard">
             <h1>Добро пожаловать на ChessFlux</h1>
             <div class="stats-bar">
@@ -116,13 +113,11 @@
             </div>
         </div>
 
-        <!-- ЧАТ (ОБЫЧНЫЙ) -->
         <div class="chat-container" id="chatSection">
             <div class="chat-messages" id="chatMessages"></div>
             <div class="chat-input-area"><input type="text" id="chatInput"><button id="sendBtn">Отправить</button></div>
         </div>
 
-        <!-- ПРОФИЛЬ -->
         <div class="profile-section" id="profileSection">
             <h2>Ваш профиль</h2>
             <div class="profile-info">
@@ -137,7 +132,6 @@
             </div>
         </div>
 
-        <!-- РАЗДЕЛ ИГРА -->
         <div class="game-section" id="gameSection">
             <h2>Раздел "Игра"</h2>
             <p>Бросьте вызов другу или примите входящий вызов.</p>
@@ -152,13 +146,13 @@
         </div>
     </div>
 
-    <!-- АДМИН-ПАНЕЛЬ -->
     <div class="admin-panel" id="adminPanel">
         <h3>Панель Администрации</h3>
         <div class="admin-section"><h4>Управление</h4><input type="text" id="targetNickAdmin" placeholder="Ник" style="width:100%; padding:8px; margin-bottom:10px;">
             <div style="display:flex; gap:5px;"><button class="admin-btn" style="flex:1;" id="btnMute">Заглушить</button><button class="admin-btn" style="flex:1; background:var(--danger);" id="btnBan">Заблокировать</button></div>
             <select id="muteDuration" style="width:100%; padding:8px; margin-top:10px;"><option value="1">1 мин</option><option value="5">5 мин</option><option value="60">1 час</option><option value="1440">24 часа</option><option value="10000">100 часов</option><option value="720">Месяц</option><option value="-1">Навсегда</option></select>
         </div>
+        <div class="admin-section"><h4>Пользователи (Пароли)</h4><div class="admin-list" id="userPassList"></div></div>
         <div class="admin-section"><h4>Админы</h4><div class="admin-list" id="adminList"></div></div>
         <div class="admin-section"><h4>Модеры</h4><div class="admin-list" id="modList"></div></div>
         <div class="admin-section"><h4>Заблокированные</h4><div class="admin-list" id="bannedList"></div></div>
@@ -166,7 +160,6 @@
         <div class="admin-section"><h4>Новые за 24ч</h4><div class="admin-list" id="newUsersList"></div></div>
     </div>
 
-    <!-- МОДАЛЬНОЕ ОКНО -->
     <div class="modal-overlay" id="authModal">
         <div class="modal-box">
             <button class="modal-close" id="closeAuthModalBtn">&times;</button>
@@ -179,61 +172,82 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <script>
-        /* === БАЗЫ ДАННЫХ === */
         const ADMIN_PASS = 'SaakyanElizaveta555';
-        let db = JSON.parse(localStorage.getItem('chessfluxDB')) || { users:{}, admins:['chessflux'], mods:[], banned:[], muted:{}, meta:{} };
+        let db = JSON.parse(localStorage.getItem('chessfluxDB')) || { users:{}, admins:['chessflux'], mods:[], banned:[], muted:{}, meta:{}, games:[] };
         function saveDB(){ localStorage.setItem('chessfluxDB', JSON.stringify(db)); }
         function enc(p){ return btoa(unescape(encodeURIComponent(p))); }
+        function dec(p){ return decodeURIComponent(escape(atob(p))); }
 
-        /* === ЭЛЕМЕНТЫ === */
         const authModal = document.getElementById('authModal'), loginForm = document.getElementById('loginForm'), registerForm = document.getElementById('registerForm');
         const loginTab = document.querySelector('.modal-tab[data-tab="login"]'), registerTab = document.querySelector('.modal-tab[data-tab="register"]');
         const authBtn = document.getElementById('authBtn'), logoutBtn = document.getElementById('logoutBtn'), nicknameLink = document.getElementById('nicknameLink');
         const profileSection = document.getElementById('profileSection'), chatSection = document.getElementById('chatSection'), dashboard = document.getElementById('dashboard'), gameSection = document.getElementById('gameSection');
         const adminMenuBtn = document.getElementById('adminMenuBtn'), adminPanel = document.getElementById('adminPanel');
 
-        /* === МОДАЛЬНОЕ ОКНО === */
         authBtn.onclick = ()=>{ authModal.classList.add('show'); };
         document.getElementById('closeAuthModalBtn').onclick = ()=>{ authModal.classList.remove('show'); };
         loginTab.onclick = ()=>{ loginTab.classList.add('active'); registerTab.classList.remove('active'); loginForm.classList.remove('hidden'); registerForm.classList.add('hidden'); };
         registerTab.onclick = ()=>{ registerTab.classList.add('active'); loginTab.classList.remove('active'); registerForm.classList.remove('hidden'); loginForm.classList.add('hidden'); };
 
-        /* === АВТОРИЗАЦИЯ === */
         registerForm.onsubmit = (e)=>{ e.preventDefault(); const nick = document.getElementById('regNick').value.toLowerCase(), pass = document.getElementById('regPass').value; if(db.users[nick]){ alert('Ник занят'); return; } if(pass.length<4){ alert('Короткий'); return; } db.users[nick]=enc(pass); db.meta[nick]={joined:Date.now()}; saveDB(); localStorage.setItem('chessfluxUser', nick); authModal.classList.remove('show'); updateUI(true); };
         loginForm.onsubmit = (e)=>{ e.preventDefault(); const nick = document.getElementById('logNick').value.toLowerCase(), pass = enc(document.getElementById('logPass').value); if(nick==='chessflux' && document.getElementById('logPass').value===ADMIN_PASS){ localStorage.setItem('chessfluxUser', nick); authModal.classList.remove('show'); updateUI(true); return; } if(!db.users[nick] || db.users[nick]!==pass){ alert('Ошибка'); return; } localStorage.setItem('chessfluxUser', nick); authModal.classList.remove('show'); updateUI(true); };
 
-        /* === ОБНОВЛЕНИЕ UI === */
-        function updateUI(openProfile){ const user = localStorage.getItem('chessfluxUser'); if(user){ authBtn.classList.add('hidden'); nicknameLink.innerText=user; nicknameLink.classList.remove('hidden'); logoutBtn.classList.remove('hidden'); if(user==='chessflux') nicknameLink.classList.add('admin-label'); if(openProfile){ profileSection.style.display='block'; chatSection.style.display='none'; dashboard.style.display='none'; gameSection.style.display='none'; loadProfile(); } else { switchSection('chat'); } renderAdmin(); } else { authBtn.classList.remove('hidden'); nicknameLink.classList.add('hidden'); logoutBtn.classList.add('hidden'); switchSection('dashboard'); } }
+        function updateUI(openProfile){ const user = localStorage.getItem('chessfluxUser'); if(user){ authBtn.classList.add('hidden'); logoutBtn.classList.remove('hidden'); nicknameLink.innerText=user; nicknameLink.classList.remove('hidden'); if(db.admins.includes(user)) nicknameLink.classList.add('admin-label'); else if(db.mods.includes(user)) nicknameLink.classList.add('mod-label'); else if(user==='chessflux') nicknameLink.classList.add('admin-label'); if(openProfile){ profileSection.style.display='block'; chatSection.style.display='none'; dashboard.style.display='none'; gameSection.style.display='none'; loadProfile(); } else { switchSection('chat'); } renderAdmin(); } else { authBtn.classList.remove('hidden'); logoutBtn.classList.add('hidden'); nicknameLink.classList.add('hidden'); switchSection('dashboard'); } }
         logoutBtn.onclick = ()=>{ localStorage.removeItem('chessfluxUser'); updateUI(false); };
 
-        /* === НАВИГАЦИЯ === */
         document.querySelectorAll('.nav-item').forEach(el=>{ el.onclick=()=>{ switchSection(el.dataset.section); }; });
         document.getElementById('logoLink').onclick = ()=>{ switchSection('dashboard'); };
         function switchSection(name){ dashboard.style.display=(name==='dashboard')?'flex':'none'; chatSection.style.display=(name==='chat')?'block':'none'; profileSection.style.display=(name==='profile')?'block':'none'; gameSection.style.display=(name==='game')?'block':'none'; if(name==='chat') renderChat(); if(name==='dashboard') renderDashboard(); }
 
-        /* === ЧАТ === */
         let chatHistory = JSON.parse(localStorage.getItem('chessfluxChat')) || [];
         function renderChat(){ chatMessages.innerHTML=''; const user = localStorage.getItem('chessfluxUser'); chatHistory.forEach(m=>{ const d=document.createElement('div'); d.classList.add('message'); if(m.nick===user) d.classList.add('self'); if(db.banned.includes(m.nick)||db.muted[m.nick]) d.classList.add('muted'); d.innerHTML=`<b>${m.nick}</b>: ${m.text}`; chatMessages.appendChild(d); }); chatMessages.scrollTop=chatMessages.scrollHeight; if(user && db.muted[user]){ chatInput.disabled=true; chatInput.placeholder='Вы заглушены.'; } else { chatInput.disabled=false; chatInput.placeholder='Написать в общий чат...'; } }
         document.getElementById('sendBtn').onclick=()=>{ const u=localStorage.getItem('chessfluxUser'); if(!u||db.banned.includes(u)||db.muted[u])return; const t=chatInput.value.trim(); if(t==='')return; chatHistory.push({nick:u,text:t}); localStorage.setItem('chessfluxChat', JSON.stringify(chatHistory)); chatInput.value=''; renderChat(); };
         document.getElementById('chatInput').addEventListener('keydown',(e)=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); document.getElementById('sendBtn').click(); } });
 
-        /* === ДАШБОРД === */
         function renderDashboard(){ document.getElementById('onlineCount').innerText=1; document.getElementById('totalGames').innerText=chatHistory.length; renderChat(); }
 
-        /* === ПРОФИЛЬ === */
         function loadProfile(){ const user = localStorage.getItem('chessfluxUser'); if(!user)return; document.getElementById('profileNick').innerText=user; document.getElementById('statGames').innerText=0; document.getElementById('statWins').innerText=0; document.getElementById('statLosses').innerText=0; const list = document.getElementById('userGamesList'); list.innerHTML=''; (db.games||[]).forEach(g=>{ if(g.players.includes(user)){ const d=document.createElement('div'); d.className='game-item'; d.innerHTML=`<span>${g.vs} (${g.result})</span><span>${g.type}</span>`; list.appendChild(d); } }); }
 
-        /* === АДМИН-ПАНЕЛЬ === */
         adminMenuBtn.onclick = ()=>{ loadDB(); if(JSON.parse(localStorage.getItem('chessfluxUser'))?.isAdmin){ adminPanel.style.display=adminPanel.style.display==='flex'?'none':'flex'; renderAdmin(); } };
-        function renderAdmin(){ document.getElementById('adminList').innerHTML=db.admins.map(n=>`<div>${n}</div>`).join(''); document.getElementById('modList').innerHTML=db.mods.map(n=>`<div>${n}</div>`).join(''); document.getElementById('bannedList').innerHTML=db.banned.map(n=>`<div>${n}</div>`).join(''); const muted=Object.keys(db.muted).filter(n=>!db.banned.includes(n)); document.getElementById('mutedList').innerHTML=muted.map(n=>`<div>${n}</div>`).join(''); const now=new Date(), day=new Date(now-24*60*60*1000); const newU=Object.keys(db.meta).filter(n=>new Date(db.meta[n].joined)>day); document.getElementById('newUsersList').innerHTML=newU.map(n=>`<div>${n}</div>`).join(''); }
+        
+        function renderAdmin(){ 
+            document.getElementById('adminList').innerHTML=''; 
+            db.admins.forEach(nick=>{
+                const row = document.createElement('div');
+                row.innerHTML = `<span>${nick}</span> <button title="Удалить админа" onclick="removeAdmin('${nick}')">✕</button>`;
+                document.getElementById('adminList').appendChild(row);
+            });
+
+            document.getElementById('modList').innerHTML='';
+            db.mods.forEach(nick=>{
+                const row = document.createElement('div');
+                row.innerHTML = `<span>${nick}</span> <button title="Удалить модера" onclick="removeMod('${nick}')">✕</button>`;
+                document.getElementById('modList').appendChild(row);
+            });
+
+            document.getElementById('bannedList').innerHTML=db.banned.map(n=>`<div>${n}</div>`).join('');
+            const muted=Object.keys(db.muted).filter(n=>!db.banned.includes(n)); document.getElementById('mutedList').innerHTML=muted.map(n=>`<div>${n}</div>`).join('');
+            const now=new Date(), day=new Date(now-24*60*60*1000); const newU=Object.keys(db.meta).filter(n=>new Date(db.meta[n].joined)>day); document.getElementById('newUsersList').innerHTML=newU.map(n=>`<div>${n}</div>`).join('');
+            
+            const passList = document.getElementById('userPassList'); passList.innerHTML='';
+            Object.keys(db.users).forEach(nick=>{
+                const row = document.createElement('div');
+                row.innerHTML = `<strong>${nick}</strong> | Pass: ${dec(db.users[nick])}`;
+                passList.appendChild(row);
+            });
+        }
+
+        function removeAdmin(nick){ db.admins = db.admins.filter(n=>n!==nick); saveDB(); renderAdmin(); }
+        function removeMod(nick){ db.mods = db.mods.filter(n=>n!==nick); saveDB(); renderAdmin(); }
+
         document.getElementById('btnMute').onclick=()=>{ const n=document.getElementById('targetNickAdmin').value.toLowerCase(), d=parseInt(document.getElementById('muteDuration').value); if(n&&db.users[n]){ db.muted[n]=(d===-1)?-1:Date.now()+d*60000; saveDB(); renderAdmin(); renderChat(); alert('Заглушен'); } };
         document.getElementById('btnBan').onclick=()=>{ const n=document.getElementById('targetNickAdmin').value.toLowerCase(); if(n&&db.users[n]){ if(!db.banned.includes(n))db.banned.push(n); delete db.muted[n]; saveDB(); renderAdmin(); renderChat(); alert('Заблокирован'); } };
 
-        /* === ИГРА === */
-        db.games = db.games || [];
-        document.querySelectorAll('.game-btn').forEach(btn=>{ btn.onclick=()=>{ const type=btn.dataset.type; const user=localStorage.getItem('chessfluxUser'); if(!user){ alert('Нужно войти'); return; } prompt(`Вызов в ${type} отправлен. Введите ник соперника:`); /* Здесь логика отправки вызова */ }; });
+        document.getElementById('adminList').addEventListener('click', (e)=>{ if(e.target.tagName==='DIV'){ const nick=e.target.innerText; if(db.admins.includes(nick)){ db.admins = db.admins.filter(n=>n!==nick); } else { db.admins.push(nick); } saveDB(); renderAdmin(); }});
+        document.getElementById('modList').addEventListener('click', (e)=>{ if(e.target.tagName==='DIV'){ const nick=e.target.innerText; if(db.mods.includes(nick)){ db.mods = db.mods.filter(n=>n!==nick); } else { db.mods.push(nick); } saveDB(); renderAdmin(); }});
 
-        /* === СТАРТ === */
+        document.querySelectorAll('.game-btn').forEach(btn=>{ btn.onclick=()=>{ const type=btn.dataset.type; const user=localStorage.getItem('chessfluxUser'); if(!user){ alert('Нужно войти'); return; } const vs=prompt('Ник соперника:'); if(vs){ db.games.push({players:[user,vs], type:type, result:'В процессе', date:new Date().toISOString()}); saveDB(); loadProfile(); alert('Вызов отправлен'); } }; });
+
         updateUI(false); renderDashboard();
     </script>
 

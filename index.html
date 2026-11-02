@@ -14,7 +14,6 @@
             flex-direction: column;
         }
 
-        /* ВЕРХНЯЯ ПАНЕЛЬ */
         .top-nav {
             position: fixed;
             top: 0;
@@ -65,18 +64,17 @@
             position: relative;
         }
         
-        /* НОВОЕ: Увеличенный никнейм с подсказкой чуть ниже */
         .nickname-display {
             color: #4CAF50;
             text-decoration: none;
             font-weight: bold;
-            font-size: 16px; /* Было 14 */
+            font-size: 16px;
             position: relative;
         }
         .nickname-display::after {
             content: 'Профиль';
             position: absolute;
-            bottom: -26px; /* Было -22px, опустили чуть ниже */
+            bottom: -26px;
             left: 50%;
             transform: translateX(-50%);
             background-color: #222;
@@ -108,7 +106,6 @@
             background-color: #555;
         }
 
-        /* ОСНОВНОЙ КОНТЕНТ */
         .main-content {
             flex-grow: 1;
             display: flex;
@@ -117,7 +114,6 @@
             box-sizing: border-box;
         }
 
-        /* ГЛАВНАЯ СТРАНИЦА (ЧАТ) */
         .chat-container {
             width: 100%;
             max-width: 800px;
@@ -183,12 +179,11 @@
             cursor: pointer;
         }
 
-        /* ПРОФИЛЬ (скрыт по умолчанию) */
         .profile-section {
             width: 100%;
             max-width: 600px;
             margin: 0 auto;
-            display: none; /* Скрыт изначально */
+            display: none;
         }
         .profile-info {
             border: 1px solid #444;
@@ -198,7 +193,6 @@
             margin-top: 30px;
         }
 
-        /* ФОРМЫ АВТОРИЗАЦИИ */
         .auth-overlay {
             position: fixed;
             top: 0;
@@ -210,7 +204,7 @@
             justify-content: center;
             align-items: center;
             z-index: 6000;
-            display: none; /* Скрыто, пока не понадобится */
+            display: none;
         }
         .auth-box {
             background-color: #1a1a1a;
@@ -254,8 +248,7 @@
     </div>
 
     <div class="main-content">
-        <!-- ГЛАВНАЯ СТРАНИЦА С ЧАТОМ -->
-        <div class="chat-container">
+        <div class="chat-container" id="chatContainer">
             <div class="chat-messages" id="chatMessages"></div>
             <div class="chat-input-area">
                 <input type="text" id="chatInput" placeholder="Написать в общий чат...">
@@ -264,7 +257,6 @@
         </div>
     </div>
 
-    <!-- ПРОФИЛЬ -->
     <div class="profile-section" id="profileSection">
         <h2>Ваш профиль</h2>
         <div class="profile-info">
@@ -307,7 +299,6 @@
         </div>
     </div>
 
-    <!-- ОКНО АВТОРИЗАЦИИ -->
     <div class="auth-overlay" id="authOverlay">
         <div class="auth-box">
             <button class="close-auth" id="closeAuthBtn">&times;</button>
@@ -353,18 +344,20 @@
         const ADMIN_PASSWORD = 'SaakyanArtur555';
         let chatHistory = JSON.parse(localStorage.getItem('chessfluxChat')) || [];
 
+        /* НОВОЕ: Состояние вкладки (чат или профиль) */
+        let currentView = localStorage.getItem('chessfluxView') || 'chat';
+
         const authOverlay = document.getElementById('authOverlay');
         const closeAuthBtn = document.getElementById('closeAuthBtn');
         const authBtn = document.getElementById('authBtn');
         const nicknameLink = document.getElementById('nicknameLink');
         const logoutBtn = document.getElementById('logoutBtn');
         const profileSection = document.getElementById('profileSection');
-        const chatContainer = document.querySelector('.chat-container');
+        const chatContainer = document.getElementById('chatContainer');
         const chatMessages = document.getElementById('chatMessages');
         const chatInput = document.getElementById('chatInput');
         const sendBtn = document.getElementById('sendBtn');
 
-        /* АВТОРИЗАЦИЯ */
         authBtn.onclick = function(e) {
             e.preventDefault();
             showAuthForm('login');
@@ -435,7 +428,17 @@
             nicknameLink.innerText = user.nick;
             nicknameLink.classList.remove('hidden');
             logoutBtn.classList.remove('hidden');
-            renderChat();
+            
+            /* НОВОЕ: При входе открываем ту вкладку, которая была открыта */
+            if (currentView === 'profile') {
+                chatContainer.style.display = 'none';
+                profileSection.style.display = 'block';
+                loadProfileData();
+            } else {
+                chatContainer.style.display = 'flex';
+                profileSection.style.display = 'none';
+                renderChat();
+            }
         }
 
         logoutBtn.onclick = function(e) {
@@ -444,16 +447,28 @@
             authBtn.classList.remove('hidden');
             nicknameLink.classList.add('hidden');
             logoutBtn.classList.add('hidden');
+            
+            /* При выходе всегда возвращаемся в чат */
+            currentView = 'chat';
+            localStorage.setItem('chessfluxView', 'chat');
             profileSection.style.display = 'none';
             chatContainer.style.display = 'flex';
         };
 
-        /* ПРОФИЛЬ */
         nicknameLink.onclick = function(e) {
             e.preventDefault();
-            chatContainer.style.display = 'none';
-            profileSection.style.display = 'block';
-            loadProfileData();
+            if (currentView === 'chat') {
+                currentView = 'profile';
+                chatContainer.style.display = 'none';
+                profileSection.style.display = 'block';
+                loadProfileData();
+            } else {
+                currentView = 'chat';
+                chatContainer.style.display = 'flex';
+                profileSection.style.display = 'none';
+                renderChat();
+            }
+            localStorage.setItem('chessfluxView', currentView);
         };
 
         function loadProfileData() {
@@ -477,7 +492,6 @@
             }
         }
 
-        /* ЧАТ */
         function renderChat() {
             chatMessages.innerHTML = '';
             chatHistory.forEach(msg => {
@@ -522,11 +536,14 @@
             renderChat();
         }
 
-        /* ЗАГРУЗКА ПРИ СТАРТЕ */
         window.onload = function() {
             const userData = localStorage.getItem('chessfluxUser');
             if (userData) {
                 updateUIAfterAuth(JSON.parse(userData));
+            } else {
+                /* Если пользователя нет, всегда показываем чат */
+                chatContainer.style.display = 'flex';
+                profileSection.style.display = 'none';
             }
             renderChat();
         };

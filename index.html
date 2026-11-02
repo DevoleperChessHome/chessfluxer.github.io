@@ -18,7 +18,9 @@
         .nav-item:hover { color:#fff; }
         
         .user-panel { margin-left:auto; display:flex; gap:15px; align-items:center; }
-        .auth-btn, .logout-btn { background:#444; color:#fff; border:1px solid #666; padding:5px 12px; text-decoration:none; border-radius:4px; font-size:13px; cursor:pointer; display:none; }
+        
+        /* ИСПРАВЛЕНО: Кнопки видны по умолчанию, если нет юзера */
+        .auth-btn, .logout-btn { background:#444; color:#fff; border:1px solid #666; padding:5px 12px; text-decoration:none; border-radius:4px; font-size:13px; cursor:pointer; }
         .auth-btn:hover, .logout-btn:hover { background:#555; }
         
         .nickname-display { color:#4CAF50; text-decoration:none; font-weight:bold; font-size:16px; position:relative; cursor:pointer; display:none; }
@@ -42,9 +44,6 @@
         .chat-messages { flex-grow:1; overflow-y:auto; padding-right:10px; margin-bottom:15px; }
         .message { margin-bottom:10px; padding:8px 12px; border-radius:15px; background:#162535; max-width:80%; line-height:1.4; }
         .message.self { background:#007bff; align-self:flex-end; margin-left:auto; }
-        .message.admin { border-left:3px solid var(--admin); }
-        .message.mod { border-left:3px solid var(--mod); }
-        .message.banned, .message.muted { background:#330000; color:var(--muted); }
         .chat-input-area { display:flex; gap:10px; border-top:1px solid #333; padding-top:15px; }
         .chat-input-area input { flex-grow:1; padding:12px; background:#222; border:1px solid #444; color:#fff; border-radius:4px; }
         .chat-input-area button { padding:0 20px; background:var(--primary); color:#fff; border:none; border-radius:4px; cursor:pointer; }
@@ -95,7 +94,7 @@
             <div class="nav-item" data-section="other">Другое</div>
         </div>
         <div class="user-panel">
-            <span class="admin-icon" id="adminMenuBtn" title="Админ-панель">⚙️</span>
+            <!-- Кнопки видны изначально -->
             <a href="#" id="authBtn" class="auth-btn">Войти</a>
             <a href="#" id="nicknameLink" class="nickname-display"></a>
             <a href="#" id="logoutBtn" class="logout-btn">Выйти</a>
@@ -186,6 +185,7 @@
         const profileSection = document.getElementById('profileSection'), chatSection = document.getElementById('chatSection'), dashboard = document.getElementById('dashboard'), gameSection = document.getElementById('gameSection');
         const adminMenuBtn = document.getElementById('adminMenuBtn'), adminPanel = document.getElementById('adminPanel');
 
+        /* === УПРАВЛЕНИЕ ВИДИМОСТЬЮ КНОПОК === */
         authBtn.onclick = ()=>{ authModal.classList.add('show'); };
         document.getElementById('closeAuthModalBtn').onclick = ()=>{ authModal.classList.remove('show'); };
         loginTab.onclick = ()=>{ loginTab.classList.add('active'); registerTab.classList.remove('active'); loginForm.classList.remove('hidden'); registerForm.classList.add('hidden'); };
@@ -194,7 +194,33 @@
         registerForm.onsubmit = (e)=>{ e.preventDefault(); const nick = document.getElementById('regNick').value.toLowerCase(), pass = document.getElementById('regPass').value; if(db.users[nick]){ alert('Ник занят'); return; } if(pass.length<4){ alert('Короткий'); return; } db.users[nick]=enc(pass); db.meta[nick]={joined:Date.now()}; saveDB(); localStorage.setItem('chessfluxUser', nick); authModal.classList.remove('show'); updateUI(true); };
         loginForm.onsubmit = (e)=>{ e.preventDefault(); const nick = document.getElementById('logNick').value.toLowerCase(), pass = enc(document.getElementById('logPass').value); if(nick==='chessflux' && document.getElementById('logPass').value===ADMIN_PASS){ localStorage.setItem('chessfluxUser', nick); authModal.classList.remove('show'); updateUI(true); return; } if(!db.users[nick] || db.users[nick]!==pass){ alert('Ошибка'); return; } localStorage.setItem('chessfluxUser', nick); authModal.classList.remove('show'); updateUI(true); };
 
-        function updateUI(openProfile){ const user = localStorage.getItem('chessfluxUser'); if(user){ authBtn.classList.add('hidden'); logoutBtn.classList.remove('hidden'); nicknameLink.innerText=user; nicknameLink.classList.remove('hidden'); if(db.admins.includes(user)) nicknameLink.classList.add('admin-label'); else if(db.mods.includes(user)) nicknameLink.classList.add('mod-label'); else if(user==='chessflux') nicknameLink.classList.add('admin-label'); if(openProfile){ profileSection.style.display='block'; chatSection.style.display='none'; dashboard.style.display='none'; gameSection.style.display='none'; loadProfile(); } else { switchSection('chat'); } renderAdmin(); } else { authBtn.classList.remove('hidden'); logoutBtn.classList.add('hidden'); nicknameLink.classList.add('hidden'); switchSection('dashboard'); } }
+        function updateUI(openProfile){ 
+            const user = localStorage.getItem('chessfluxUser'); 
+            if(user){ 
+                /* Если залогинен: прячем кнопки входа, показываем ник */
+                authBtn.classList.add('hidden'); 
+                logoutBtn.classList.remove('hidden'); 
+                nicknameLink.innerText=user; 
+                nicknameLink.classList.remove('hidden'); 
+                if(db.admins.includes(user)) nicknameLink.classList.add('admin-label'); 
+                else if(db.mods.includes(user)) nicknameLink.classList.add('mod-label'); 
+                else if(user==='chessflux') nicknameLink.classList.add('admin-label'); 
+                
+                if(openProfile){ 
+                    profileSection.style.display='block'; chatSection.style.display='none'; dashboard.style.display='none'; gameSection.style.display='none'; 
+                    loadProfile(); 
+                } else { 
+                    switchSection('chat'); 
+                } 
+                renderAdmin(); 
+            } else { 
+                /* Если НЕ залогинен: показываем кнопки входа, прячем ник */
+                authBtn.classList.remove('hidden'); 
+                logoutBtn.classList.add('hidden'); 
+                nicknameLink.classList.add('hidden'); 
+                switchSection('dashboard'); 
+            } 
+        }
         logoutBtn.onclick = ()=>{ localStorage.removeItem('chessfluxUser'); updateUI(false); };
 
         document.querySelectorAll('.nav-item').forEach(el=>{ el.onclick=()=>{ switchSection(el.dataset.section); }; });

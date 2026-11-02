@@ -99,7 +99,6 @@
         }
         .logout-btn:hover { background-color: #555; }
 
-        /* Иконка админки */
         .admin-icon {
             color: var(--admin-color);
             font-size: 20px;
@@ -391,14 +390,24 @@
         let chatHistory = JSON.parse(localStorage.getItem('chessfluxChat')) || [];
         let currentView = localStorage.getItem('chessfluxView') || 'chat';
 
-        /* БАЗЫ ДАННЫХ (без Email) */
-        let db = JSON.parse(localStorage.getItem('chessfluxDB')) || {
-            users: {}, 
-            admins: ['chessflux'], 
-            mods: [], 
-            banned: [],
-            registerDates: {}
-        };
+        /* Глобальная переменная базы данных */
+        let db = {};
+
+        /* Функция загрузки базы (чтобы всегда иметь свежие данные) */
+        function loadDatabase() {
+            const saved = localStorage.getItem('chessfluxDB');
+            if (saved) {
+                db = JSON.parse(saved);
+            } else {
+                db = {
+                    users: {}, 
+                    admins: ['chessflux'], 
+                    mods: [], 
+                    banned: [],
+                    registerDates: {}
+                };
+            }
+        }
 
         /* ЭЛЕМЕНТЫ */
         const authOverlay = document.getElementById('authOverlay');
@@ -421,14 +430,32 @@
             toast.innerText = message;
             document.getElementById('toastContainer').appendChild(toast);
             toast.classList.add('show');
-            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3000);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
         }
 
         /* =============== АВТОРИЗАЦИЯ (БЕЗ EMAIL) =============== */
-        authBtn.onclick = function(e) { e.preventDefault(); showAuthForm('login'); authOverlay.classList.add('show'); };
+        authBtn.onclick = function(e) { 
+            e.preventDefault(); 
+            loadDatabase(); // <--- ПЕРЕЗАГРУЖАЕМ БАЗУ ПЕРЕД ОТКРЫТИЕМ
+            showAuthForm('login'); 
+            authOverlay.classList.add('show'); 
+        };
         closeAuthBtn.onclick = function() { authOverlay.classList.remove('show'); };
-        document.getElementById('toRegister').onclick = function(e) { e.preventDefault(); showAuthForm('register'); authOverlay.classList.add('show'); };
-        document.getElementById('toLogin').onclick = function(e) { e.preventDefault(); showAuthForm('login'); authOverlay.classList.add('show'); };
+        document.getElementById('toRegister').onclick = function(e) { 
+            e.preventDefault(); 
+            loadDatabase(); // <--- ПЕРЕЗАГРУЖАЕМ БАЗУ
+            showAuthForm('register'); 
+            authOverlay.classList.add('show'); 
+        };
+        document.getElementById('toLogin').onclick = function(e) { 
+            e.preventDefault(); 
+            loadDatabase(); // <--- ПЕРЕЗАГРУЖАЕМ БАЗУ
+            showAuthForm('login'); 
+            authOverlay.classList.add('show'); 
+        };
 
         function showAuthForm(type) {
             document.getElementById('registerForm').classList.add('hidden');
@@ -439,6 +466,7 @@
 
         document.getElementById('regForm').onsubmit = function(e) {
             e.preventDefault();
+            loadDatabase(); // <--- ОБНОВЛЯЕМ БАЗУ ПЕРЕД ЗАПИСЬЮ
             const nick = document.getElementById('regNick').value.toLowerCase();
             const pass = document.getElementById('regPass').value;
 
@@ -462,6 +490,7 @@
 
         document.getElementById('logForm').onsubmit = function(e) {
             e.preventDefault();
+            loadDatabase(); // <--- САМОЕ ВАЖНОЕ: ПЕРЕД ПРОВЕРКОЙ ВХОДА ЗАГРУЖАЕМ СВЕЖУЮ БАЗУ
             const nick = document.getElementById('logNick').value.toLowerCase();
             const pass = document.getElementById('logPass').value;
             
@@ -575,6 +604,7 @@
         });
 
         function sendMessage() {
+            loadDatabase(); // На всякий случай перед отправкой
             const userData = localStorage.getItem('chessfluxUser');
             if (!userData) { showToast('Только зарегистрированные пользователи могут писать.', 'error'); return; }
             
@@ -606,6 +636,7 @@
             if (userData) {
                 const user = JSON.parse(userData);
                 if (user.isAdmin) {
+                    loadDatabase(); // Обновляем списки перед открытием
                     adminPanel.style.display = adminPanel.style.display === 'flex' ? 'none' : 'flex';
                     renderAdminPanel();
                 }
@@ -634,6 +665,7 @@
         }
 
         function setRole(type) {
+            loadDatabase();
             const nick = document.getElementById('adminTargetNick').value.toLowerCase();
             if (!nick || !db.users[nick]) { showToast('Пользователь не найден.', 'error'); return; }
 
@@ -655,6 +687,7 @@
         }
 
         function setBan(isBanned) {
+            loadDatabase();
             const nick = document.getElementById('banTargetNick').value.toLowerCase();
             if (!nick || !db.users[nick]) { showToast('Пользователь не найден.', 'error'); return; }
 
@@ -672,6 +705,7 @@
 
         /* =============== ЗАГРУЗКА =============== */
         window.onload = function() {
+            loadDatabase(); // <--- При старте страницы тоже загружаем базу
             const userData = localStorage.getItem('chessfluxUser');
             if (userData) {
                 updateUIAfterAuth(JSON.parse(userData));

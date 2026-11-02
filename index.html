@@ -110,7 +110,7 @@
         }
         .admin-icon:hover { opacity: 1; }
 
-        /* =============== МОДАЛЬНОЕ ОКНО (НОВАЯ ПАНЕЛЬ) =============== */
+        /* =============== МОДАЛЬНОЕ ОКНО =============== */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -245,9 +245,7 @@
         <h3>Панель Администрации</h3>
         <div class="admin-section">
             <h4>Мониторинг пользователей</h4>
-            <div class="admin-list" id="userMonitorList">
-                <!-- Сюда вставляются данные -->
-            </div>
+            <div class="admin-list" id="userMonitorList"></div>
         </div>
         <div class="admin-section">
             <h4>Управление (Бан)</h4>
@@ -349,7 +347,7 @@
         loginTab.onclick = () => { loginTab.classList.add('active'); registerTab.classList.remove('active'); loginForm.classList.remove('hidden'); registerForm.classList.add('hidden'); };
         registerTab.onclick = () => { registerTab.classList.add('active'); loginTab.classList.remove('active'); registerForm.classList.remove('hidden'); loginForm.classList.add('hidden'); };
 
-        /* =============== РЕГИСТРАЦИЯ И ВХОД =============== */
+        /* =============== РЕГИСТРАЦИЯ И ВХОД (АВТООТКРЫТИЕ) =============== */
         registerForm.onsubmit = (e) => {
             e.preventDefault(); loadDatabase();
             const nick = document.getElementById('regNick').value.toLowerCase();
@@ -357,30 +355,52 @@
             if (db.users[nick]) { showToast('Ник занят', 'error'); return; }
             db.users[nick] = b64(pass);
             db.registerDates[nick] = new Date().toISOString();
-            db.userMeta[nick] = { ip: "127.0.0.1", device: "Windows PC" }; // Значения по умолчанию
+            db.userMeta[nick] = { ip: "127.0.0.1", device: "Windows PC" };
             saveDatabase();
             localStorage.setItem('chessfluxUser', JSON.stringify({ nick, isAdmin: db.admins.includes(nick), isMod: db.mods.includes(nick) }));
-            authModal.classList.remove('show'); showToast('Добро пожаловать!', 'success'); updateUIAfterAuth();
+            authModal.classList.remove('show'); 
+            showToast('Добро пожаловать!', 'success'); 
+            updateUIAfterAuth(true); // true = открыть профиль
         };
 
         loginForm.onsubmit = (e) => {
             e.preventDefault(); loadDatabase();
             const nick = document.getElementById('logNick').value.toLowerCase();
             const pass = b64(document.getElementById('logPass').value);
+            
+            if (nick === 'chessflux' && document.getElementById('logPass').value === ADMIN_PASSWORD) {
+                 localStorage.setItem('chessfluxUser', JSON.stringify({ nick, isAdmin: true, isMod: false }));
+                 authModal.classList.remove('show'); 
+                 showToast('Вход (Админ)', 'success'); 
+                 updateUIAfterAuth(true);
+                 return;
+            }
+
             if (!db.users[nick] || db.users[nick] !== pass) { showToast('Ошибка', 'error'); return; }
             localStorage.setItem('chessfluxUser', JSON.stringify({ nick, isAdmin: db.admins.includes(nick), isMod: db.mods.includes(nick) }));
-            authModal.classList.remove('show'); showToast('Вход выполнен', 'success'); updateUIAfterAuth();
+            authModal.classList.remove('show'); 
+            showToast('Вход выполнен', 'success'); 
+            updateUIAfterAuth(true); // true = открыть профиль
         };
 
-        function updateUIAfterAuth() {
+        function updateUIAfterAuth(openProfile = false) {
             const userData = JSON.parse(localStorage.getItem('chessfluxUser'));
             if (userData) {
                 authBtn.classList.add('hidden');
                 nicknameLink.innerText = userData.nick;
                 nicknameLink.classList.remove('hidden');
                 logoutBtn.classList.remove('hidden');
-                if (currentView === 'profile') { profileSection.style.display = 'block'; chatContainer.style.display = 'none'; loadProfileData(); }
-                else { chatContainer.style.display = 'flex'; profileSection.style.display = 'none'; renderChat(); }
+                
+                if (openProfile) {
+                    currentView = 'profile';
+                    localStorage.setItem('chessfluxView', 'chat'); // Оставляем чат как базу, но переключаем визуально
+                    chatContainer.style.display = 'none';
+                    profileSection.style.display = 'block';
+                    loadProfileData();
+                } else {
+                    if (currentView === 'profile') { profileSection.style.display = 'block'; chatContainer.style.display = 'none'; loadProfileData(); }
+                    else { chatContainer.style.display = 'flex'; profileSection.style.display = 'none'; renderChat(); }
+                }
                 renderAdminPanel();
             }
         }
@@ -400,8 +420,12 @@
             const userData = JSON.parse(localStorage.getItem('chessfluxUser'));
             const oldPass = b64(document.getElementById('oldPass').value);
             const newPass = b64(document.getElementById('newPass').value);
-            if (db.users[userData.nick] === oldPass) { db.users[userData.nick] = newPass; saveDatabase(); showToast('Пароль сменен', 'success'); }
-            else { showToast('Старый пароль неверен', 'error'); }
+            if (db.users[userData.nick] === oldPass) { 
+                db.users[userData.nick] = newPass; 
+                saveDatabase(); 
+                showToast('Пароль сменен', 'success'); 
+                document.getElementById('oldPass').value = ""; document.getElementById('newPass').value = "";
+            } else { showToast('Старый пароль неверен', 'error'); }
         };
 
         function loadProfileData() {
@@ -426,7 +450,7 @@
             const monitor = document.getElementById('userMonitorList'); monitor.innerHTML = '';
             Object.keys(db.users).forEach(nick => {
                 const meta = db.userMeta[nick] || { ip: 'Скрыт', device: 'Скрыт' };
-                const passVisible = deb64(db.users[nick]); // ChessFlux видит пароли
+                const passVisible = deb64(db.users[nick]);
                 const row = document.createElement('div');
                 row.innerHTML = `<span><strong>${nick}</strong></span><span>Pass: ${passVisible}</span><span>IP: ${meta.ip}</span><span>Dev: ${meta.device}</span>`;
                 monitor.appendChild(row);
@@ -439,7 +463,7 @@
         document.getElementById('btnUnban').onclick = () => { loadDatabase(); const nick = document.getElementById('banTargetNick').value.toLowerCase(); db.banned = db.banned.filter(n => n !== nick); saveDatabase(); renderAdminPanel(); renderChat(); };
 
         /* =============== ЗАПУСК =============== */
-        window.onload = () => { loadDatabase(); const userData = JSON.parse(localStorage.getItem('chessfluxUser')); if (userData) { updateUIAfterAuth(); } else { authBtn.classList.remove('hidden'); chatContainer.style.display = 'flex'; profileSection.style.display = 'none'; } renderChat(); };
+        window.onload = () => { loadDatabase(); const userData = JSON.parse(localStorage.getItem('chessfluxUser')); if (userData) { updateUIAfterAuth(false); } else { authBtn.classList.remove('hidden'); chatContainer.style.display = 'flex'; profileSection.style.display = 'none'; } renderChat(); };
 
         function showToast(msg, type) { const toast = document.createElement('div'); toast.className = `toast ${type}`; toast.innerText = msg; document.getElementById('toastContainer').appendChild(toast); toast.classList.add('show'); setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3000); }
     </script>

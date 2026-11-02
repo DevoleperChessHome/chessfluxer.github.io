@@ -9,8 +9,12 @@
             margin: 0;
             font-family: Arial, sans-serif;
             color: #FFFFFF;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
+        /* ВЕРХНЯЯ ПАНЕЛЬ */
         .top-nav {
             position: fixed;
             top: 0;
@@ -53,7 +57,6 @@
             cursor: default;
         }
         
-        /* НОВОЕ: Стили для отображения ника */
         .user-panel {
             margin-left: auto;
             display: flex;
@@ -61,22 +64,24 @@
             align-items: center;
             position: relative;
         }
+        
+        /* НОВОЕ: Увеличенный никнейм с подсказкой чуть ниже */
         .nickname-display {
             color: #4CAF50;
             text-decoration: none;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 16px; /* Было 14 */
             position: relative;
         }
         .nickname-display::after {
             content: 'Профиль';
             position: absolute;
-            bottom: -22px;
+            bottom: -26px; /* Было -22px, опустили чуть ниже */
             left: 50%;
             transform: translateX(-50%);
             background-color: #222;
             color: white;
-            padding: 3px 8px;
+            padding: 4px 10px;
             border-radius: 4px;
             font-size: 12px;
             white-space: nowrap;
@@ -103,37 +108,87 @@
             background-color: #555;
         }
 
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            text-align: center;
-            padding-top: 100px;
+        /* ОСНОВНОЙ КОНТЕНТ */
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            padding-top: 80px;
+            padding-bottom: 20px;
+            box-sizing: border-box;
         }
 
-        .form-group {
-            margin-bottom: 15px;
-            text-align: left;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-        }
-        .form-group input, .form-group textarea {
+        /* ГЛАВНАЯ СТРАНИЦА (ЧАТ) */
+        .chat-container {
             width: 100%;
-            padding: 10px;
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #0d1b2a;
+            border: 1px solid #444;
+            border-radius: 8px;
+            height: 70vh;
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+        .chat-messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+            margin-bottom: 15px;
+        }
+        .message {
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            border-radius: 15px;
+            background-color: #162535;
+            max-width: 80%;
+            line-height: 1.4;
+        }
+        .message.self {
+            background-color: #007bff;
+            align-self: flex-end;
+            margin-left: auto;
+        }
+        .message .meta {
+            font-size: 11px;
+            color: #888;
+            margin-bottom: 4px;
+        }
+        .message.self .meta {
+            color: #cce5ff;
+        }
+
+        .chat-input-area {
+            display: flex;
+            gap: 10px;
+            border-top: 1px solid #333;
+            padding-top: 15px;
+        }
+        .chat-input-area input {
+            flex-grow: 1;
+            padding: 12px;
             background-color: #222;
             border: 1px solid #444;
             color: white;
             border-radius: 4px;
         }
-        button[type="submit"] {
+        .chat-input-area button {
+            padding: 0 20px;
             background-color: #007bff;
             color: white;
-            padding: 10px 20px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
+        }
+
+        /* ПРОФИЛЬ (скрыт по умолчанию) */
+        .profile-section {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            display: none; /* Скрыт изначально */
         }
         .profile-info {
             border: 1px solid #444;
@@ -142,44 +197,38 @@
             background-color: #0d1b2a;
             margin-top: 30px;
         }
-        .hidden {
-            display: none;
-        }
 
-        .games-list {
-            text-align: left;
-            margin-top: 20px;
-            border-top: 1px solid #444;
-            padding-top: 20px;
-        }
-        .game-item {
-            padding: 8px 0;
-            border-bottom: 1px dashed #333;
+        /* ФОРМЫ АВТОРИЗАЦИИ */
+        .auth-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
+            align-items: center;
+            z-index: 6000;
+            display: none; /* Скрыто, пока не понадобится */
         }
-        .game-win { color: #4CAF50; }
-        .game-loss { color: #F44336; }
-        .no-games { color: #888; font-style: italic; }
-
-        .emoji {
-            font-size: 48px;
-            display: inline-block;
-            user-select: none;
+        .auth-box {
+            background-color: #1a1a1a;
+            padding: 30px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+            position: relative;
         }
-        .emoji-static {
-            animation: float 4s ease-in-out infinite;
-        }
-        .emoji-moving {
-            animation: float 3s ease-in-out infinite, spin 5s linear infinite;
-        }
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-        }
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+        .close-auth {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 24px;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -198,16 +247,70 @@
             </ul>
         </nav>
         <div class="user-panel">
+            <a href="#" id="authBtn" class="auth-btn">Войти</a>
             <a href="#" id="nicknameLink" class="nickname-display hidden"></a>
             <a href="#" id="logoutBtn" class="logout-btn hidden">Выйти</a>
         </div>
     </div>
 
-    <div class="container">
-        <h1>Шахматный клуб</h1>
-        <p>Добро пожаловать. Здесь мы учимся играть в шахматы, разбираем партии и общаемся.</p>
+    <div class="main-content">
+        <!-- ГЛАВНАЯ СТРАНИЦА С ЧАТОМ -->
+        <div class="chat-container">
+            <div class="chat-messages" id="chatMessages"></div>
+            <div class="chat-input-area">
+                <input type="text" id="chatInput" placeholder="Написать в общий чат...">
+                <button id="sendBtn">Отправить</button>
+            </div>
+        </div>
+    </div>
 
-        <div id="authForms" class="hidden">
+    <!-- ПРОФИЛЬ -->
+    <div class="profile-section" id="profileSection">
+        <h2>Ваш профиль</h2>
+        <div class="profile-info">
+            <h3 id="profileNick"></h3>
+            <p><strong>Статистика:</strong></p>
+            <p>Сыграно партий: <span id="statGames">0</span></p>
+            <p>Побед: <span id="statWins">0</span></p>
+            <p>Поражений: <span id="statLosses">0</span></p>
+
+            <hr>
+            <h3>Редактировать профиль</h3>
+            <form id="editForm">
+                <div class="form-group">
+                    <label for="bioText">О себе (до 400 символов):</label>
+                    <textarea id="bioText" maxlength="400" rows="4" placeholder="Расскажите о своем любимом дебюте..."></textarea>
+                    <small>Осталось: <span id="charCount">400</span> символов</small>
+                </div>
+                <button type="submit">Сохранить описание</button>
+            </form>
+            <p id="bioDisplay" style="margin-top: 15px; font-style: italic; color: #ccc; min-height: 40px;"></p>
+
+            <hr>
+            <h3>Ваши партии</h3>
+            <button id="viewGamesBtn" style="background-color: #6f42c1; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 15px;">
+                Посмотреть список партий
+            </button>
+
+            <div id="gamesContainer" class="hidden games-list">
+                <div id="gamesList"></div>
+            </div>
+
+            <hr>
+            <h3>Фигуры в движении &#9919;</h3>
+            <div style="font-size: 64px; margin: 20px 0;">
+                <span class="emoji emoji-static">♔</span>
+                <span class="emoji emoji-moving">♕</span>
+                <span class="emoji emoji-static">♖</span>
+                <span class="emoji emoji-moving">♘</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ОКНО АВТОРИЗАЦИИ -->
+    <div class="auth-overlay" id="authOverlay">
+        <div class="auth-box">
+            <button class="close-auth" id="closeAuthBtn">&times;</button>
             <div id="registerForm">
                 <h2>Регистрация</h2>
                 <form id="regForm">
@@ -244,91 +347,46 @@
                 <p><a href="#" id="toRegister">Нет аккаунта? Зарегистрироваться</a></p>
             </div>
         </div>
-
-        <div id="profileSection" class="hidden">
-            <h2>Ваш профиль</h2>
-            <div class="profile-info">
-                <h3 id="profileNick"></h3>
-                <p><strong>Статистика:</strong></p>
-                <p>Сыграно партий: <span id="statGames">0</span></p>
-                <p>Побед: <span id="statWins">0</span></p>
-                <p>Поражений: <span id="statLosses">0</span></p>
-
-                <hr>
-                <h3>Редактировать профиль</h3>
-                <form id="editForm">
-                    <div class="form-group">
-                        <label for="bioText">О себе (до 400 символов):</label>
-                        <textarea id="bioText" maxlength="400" rows="4" placeholder="Расскажите о своем любимом дебюте..."></textarea>
-                        <small>Осталось: <span id="charCount">400</span> символов</small>
-                    </div>
-                    <button type="submit">Сохранить описание</button>
-                </form>
-                <p id="bioDisplay" style="margin-top: 15px; font-style: italic; color: #ccc; min-height: 40px;"></p>
-
-                <hr>
-                <h3>Ваши партии</h3>
-                <button id="viewGamesBtn" style="background-color: #6f42c1; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 15px;">
-                    Посмотреть список партий
-                </button>
-
-                <div id="gamesContainer" class="hidden games-list">
-                    <div id="gamesList"></div>
-                </div>
-
-                <hr>
-                <h3>Фигуры в движении &#9919;</h3>
-                <div style="font-size: 64px; margin: 20px 0;">
-                    <span class="emoji emoji-static">♔</span>
-                    <span class="emoji emoji-moving">♕</span>
-                    <span class="emoji emoji-static">♖</span>
-                    <span class="emoji emoji-moving">♘</span>
-                </div>
-            </div>
-        </div>
     </div>
 
     <script>
         const ADMIN_PASSWORD = 'SaakyanArtur555';
+        let chatHistory = JSON.parse(localStorage.getItem('chessfluxChat')) || [];
 
-        window.onload = function() {
-            const userData = localStorage.getItem('chessfluxUser');
-            if (userData) {
-                try {
-                    const user = JSON.parse(userData);
-                    showProfile(user);
-                } catch (e) {
-                    localStorage.removeItem('chessfluxUser');
-                }
-            }
-            updateCharCount();
-        };
-
-        const authForms = document.getElementById('authForms');
-        const registerForm = document.getElementById('registerForm');
-        const loginForm = document.getElementById('loginForm');
-        const profileSection = document.getElementById('profileSection');
-
+        const authOverlay = document.getElementById('authOverlay');
+        const closeAuthBtn = document.getElementById('closeAuthBtn');
+        const authBtn = document.getElementById('authBtn');
         const nicknameLink = document.getElementById('nicknameLink');
         const logoutBtn = document.getElementById('logoutBtn');
+        const profileSection = document.getElementById('profileSection');
+        const chatContainer = document.querySelector('.chat-container');
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendBtn');
 
-        /* НОВОЕ: Клик по никнейму открывает профиль */
-        nicknameLink.onclick = function(e) {
+        /* АВТОРИЗАЦИЯ */
+        authBtn.onclick = function(e) {
             e.preventDefault();
-            profileSection.classList.remove('hidden');
+            showAuthForm('login');
+            authOverlay.style.display = 'flex';
         };
+        closeAuthBtn.onclick = function() { authOverlay.style.display = 'none'; };
 
         document.getElementById('toRegister').onclick = function(e) {
             e.preventDefault();
-            registerForm.classList.remove('hidden');
-            loginForm.classList.add('hidden');
+            showAuthForm('register');
         };
-
         document.getElementById('toLogin').onclick = function(e) {
             e.preventDefault();
-            loginForm.classList.remove('hidden');
-            registerForm.classList.add('hidden');
+            showAuthForm('login');
         };
+
+        function showAuthForm(type) {
+            document.getElementById('registerForm').classList.add('hidden');
+            document.getElementById('loginForm').classList.add('hidden');
+            if (type === 'register') document.getElementById('registerForm').classList.remove('hidden');
+            if (type === 'login') document.getElementById('loginForm').classList.remove('hidden');
+        }
 
         document.getElementById('regForm').onsubmit = function(e) {
             e.preventDefault();
@@ -340,150 +398,138 @@
                 nick: nick,
                 email: email,
                 password: pass,
-                games: 0,
-                wins: 0,
-                losses: 0,
-                bio: "",
-                history: [],
                 isAdmin: (nick.toLowerCase() === 'chessflux')
             };
-
             localStorage.setItem('chessfluxUser', JSON.stringify(user));
-            showProfile(user);
+            authOverlay.style.display = 'none';
+            updateUIAfterAuth(user);
         };
 
         document.getElementById('logForm').onsubmit = function(e) {
             e.preventDefault();
             const email = document.getElementById('logEmail').value;
             const pass = document.getElementById('logPass').value;
-
             const userData = localStorage.getItem('chessfluxUser');
             if (userData) {
                 const user = JSON.parse(userData);
                 if (user.isAdmin) {
-                    if (user.email === email && pass === ADMIN_PASSWORD) {
-                        showProfile(user);
+                    if (email === user.email && pass === ADMIN_PASSWORD) {
+                        authOverlay.style.display = 'none';
+                        updateUIAfterAuth(user);
                     } else {
-                        alert('Неверный пароль для Создателя Сайта.');
+                        alert('Неверный пароль для Создателя.');
                     }
                 } else {
-                    if (user.email === email && user.password === pass) {
-                        showProfile(user);
+                    if (email === user.email && pass === user.password) {
+                        authOverlay.style.display = 'none';
+                        updateUIAfterAuth(user);
                     } else {
                         alert('Неверный email или пароль.');
                     }
                 }
-            } else {
-                alert('Сначала нужно зарегистрировать аккаунт.');
             }
         };
 
-        function showProfile(user) {
-            authForms.classList.add('hidden');
-            profileSection.classList.remove('hidden');
-            
-            /* НОВОЕ: Показываем никнейм в шапке */
+        function updateUIAfterAuth(user) {
+            authBtn.classList.add('hidden');
             nicknameLink.innerText = user.nick;
             nicknameLink.classList.remove('hidden');
             logoutBtn.classList.remove('hidden');
-
-            const nickElement = document.getElementById('profileNick');
-            nickElement.innerText = user.nick;
-
-            if (user.isAdmin) {
-                const creatorSpan = document.createElement('span');
-                creatorSpan.style.color = 'orange';
-                creatorSpan.style.marginLeft = '10px';
-                creatorSpan.innerText = 'Создатель Сайта';
-                nickElement.appendChild(creatorSpan);
-            }
-
-            document.getElementById('statGames').innerText = user.games;
-            document.getElementById('statWins').innerText = user.wins;
-            document.getElementById('statLosses').innerText = user.losses;
-            
-            document.getElementById('bioText').value = user.bio || "";
-            document.getElementById('bioDisplay').innerText = user.bio || "Описание не заполнено.";
-            updateCharCount();
+            renderChat();
         }
 
         logoutBtn.onclick = function(e) {
             e.preventDefault();
-            profileSection.classList.add('hidden');
+            localStorage.removeItem('chessfluxUser');
+            authBtn.classList.remove('hidden');
             nicknameLink.classList.add('hidden');
             logoutBtn.classList.add('hidden');
-            authForms.classList.add('hidden');
+            profileSection.style.display = 'none';
+            chatContainer.style.display = 'flex';
         };
 
-        function addGameResult(result) {
+        /* ПРОФИЛЬ */
+        nicknameLink.onclick = function(e) {
+            e.preventDefault();
+            chatContainer.style.display = 'none';
+            profileSection.style.display = 'block';
+            loadProfileData();
+        };
+
+        function loadProfileData() {
             const userData = localStorage.getItem('chessfluxUser');
             if (userData) {
                 const user = JSON.parse(userData);
-                user.games++;
-                if (result === 'win') {
-                    user.wins++;
-                } else if (result === 'loss') {
-                    user.losses++;
+                const nickElement = document.getElementById('profileNick');
+                nickElement.innerText = user.nick;
+                if (user.isAdmin) {
+                    const span = document.createElement('span');
+                    span.style.color = 'orange';
+                    span.style.marginLeft = '10px';
+                    span.innerText = 'Создатель Сайта';
+                    nickElement.appendChild(span);
                 }
-                
-                const gameRecord = {
-                    date: new Date().toLocaleString('ru-RU'),
-                    result: result
-                };
-                user.history.push(gameRecord);
-
-                localStorage.setItem('chessfluxUser', JSON.stringify(user));
-                showProfile(user);
+                document.getElementById('statGames').innerText = user.games || 0;
+                document.getElementById('statWins').innerText = user.wins || 0;
+                document.getElementById('statLosses').innerText = user.losses || 0;
+                document.getElementById('bioText').value = user.bio || "";
+                document.getElementById('bioDisplay').innerText = user.bio || "Описание не заполнено.";
             }
         }
 
-        document.getElementById('viewGamesBtn').onclick = function(e) {
-            e.preventDefault();
-            const gamesContainer = document.getElementById('gamesContainer');
-            const gamesList = document.getElementById('gamesList');
-            
-            const userData = localStorage.getItem('chessfluxUser');
-            if (userData) {
-                const user = JSON.parse(userData);
-                
-                if (user.history.length === 0) {
-                    gamesList.innerHTML = '<p class="no-games">Вы еще не сыграли ни одной партии.</p>';
-                } else {
-                    let html = '';
-                    user.history.forEach(game => {
-                        const className = game.result === 'win' ? 'game-win' : 'game-loss';
-                        const text = game.result === 'win' ? 'Победа' : 'Поражение';
-                        html += `<div class="game-item ${className}">
-                                    <span>${game.date}</span>
-                                    <span>${text}</span>
-                                </div>`;
-                    });
-                    gamesList.innerHTML = html;
+        /* ЧАТ */
+        function renderChat() {
+            chatMessages.innerHTML = '';
+            chatHistory.forEach(msg => {
+                const div = document.createElement('div');
+                div.classList.add('message');
+                if (msg.nick === (JSON.parse(localStorage.getItem('chessfluxUser')) || {}).nick) {
+                    div.classList.add('self');
                 }
-            }
-            gamesContainer.classList.remove('hidden');
-        };
+                div.innerHTML = `<div class="meta">${msg.nick} • ${msg.time}</div>${msg.text}`;
+                chatMessages.appendChild(div);
+            });
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
 
-        document.getElementById('editForm').onsubmit = function(e) {
-            e.preventDefault();
-            const newBio = document.getElementById('bioText').value;
+        sendBtn.onclick = sendMessage;
+        chatInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        function sendMessage() {
+            const userData = localStorage.getItem('chessfluxUser');
+            if (!userData) {
+                alert('Только зарегистрированные пользователи могут писать в чат.');
+                return;
+            }
+            const text = chatInput.value.trim();
+            if (text === '') return;
+
+            const user = JSON.parse(userData);
+            const message = {
+                nick: user.nick,
+                text: text,
+                time: new Date().toLocaleTimeString('ru-RU', {hour: '2-digit', minute:'2-digit'})
+            };
+
+            chatHistory.push(message);
+            localStorage.setItem('chessfluxChat', JSON.stringify(chatHistory));
+            chatInput.value = '';
+            renderChat();
+        }
+
+        /* ЗАГРУЗКА ПРИ СТАРТЕ */
+        window.onload = function() {
             const userData = localStorage.getItem('chessfluxUser');
             if (userData) {
-                const user = JSON.parse(userData);
-                user.bio = newBio;
-                localStorage.setItem('chessfluxUser', JSON.stringify(user));
-                document.getElementById('bioDisplay').innerText = newBio;
-                alert('Описание сохранено!');
+                updateUIAfterAuth(JSON.parse(userData));
             }
+            renderChat();
         };
-
-        updateCharCount();
-        function updateCharCount() {
-            const text = document.getElementById('bioText').value;
-            const length = text.length;
-            const left = 400 - length;
-            document.getElementById('charCount').innerText = left;
-        }
     </script>
 
 </body>

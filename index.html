@@ -9,8 +9,10 @@
             --success: #4CAF50;
             --warning: #FFA000;
             --danger: #F44336;
-            --admin-color: #FFD700; /* Золотой для админов */
-            --mod-color: #4FC3F7; /* Голубой для модераторов */
+            --admin-color: #FFD700;
+            --mod-color: #4FC3F7;
+            --bg-dark: #0d1b2a;
+            --bg-panel: #1a1a1a;
         }
 
         body {
@@ -38,13 +40,7 @@
             box-sizing: border-box;
             z-index: 5000;
         }
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: #666;
-            text-decoration: none;
-            margin-right: 40px;
-        }
+        .logo { font-size: 24px; font-weight: bold; color: #666; text-decoration: none; margin-right: 40px; }
         .logo:hover { color: #fff; }
         
         .nav-menu {
@@ -54,13 +50,7 @@
             margin: 0;
             padding: 0;
         }
-        .nav-item {
-            color: #ccc;
-            text-decoration: none;
-            font-size: 15px;
-            transition: color 0.2s;
-            cursor: pointer;
-        }
+        .nav-item { color: #ccc; text-decoration: none; font-size: 15px; transition: color 0.2s; cursor: pointer; }
         .nav-item:hover { color: #fff; }
         
         .user-panel {
@@ -109,12 +99,23 @@
         }
         .logout-btn:hover { background-color: #555; }
 
+        /* Иконка админки */
+        .admin-icon {
+            color: var(--admin-color);
+            font-size: 20px;
+            cursor: pointer;
+            margin-right: 15px;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+        .admin-icon:hover { opacity: 1; }
+
         /* =============== АДМИН-ПАНЕЛЬ =============== */
         .admin-panel {
             position: fixed;
             top: 70px;
             right: 20px;
-            background-color: #1a1a1a;
+            background-color: var(--bg-panel);
             border: 1px solid #444;
             border-radius: 8px;
             width: 350px;
@@ -125,54 +126,16 @@
             flex-direction: column;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-        .admin-panel h3 {
-            margin: 0;
-            padding: 15px;
-            background-color: #222;
-            border-bottom: 1px solid #333;
-            text-align: center;
-            color: var(--admin-color);
-        }
-        .admin-section {
-            padding: 15px;
-        }
-        .admin-section h4 {
-            margin-top: 0;
-            color: #ccc;
-            font-size: 14px;
-            margin-bottom: 10px;
-        }
-        .admin-list {
-            max-height: 150px;
-            overflow-y: auto;
-            font-size: 13px;
-            background-color: #0d1b2a;
-            padding: 10px;
-            border-radius: 4px;
-        }
-        .admin-list div {
-            padding: 5px;
-            border-bottom: 1px dashed #333;
-            display: flex;
-            justify-content: space-between;
-        }
+        .admin-panel h3 { margin: 0; padding: 15px; background-color: #222; border-bottom: 1px solid #333; text-align: center; color: var(--admin-color); }
+        .admin-section { padding: 15px; }
+        .admin-section h4 { margin-top: 0; color: #ccc; font-size: 14px; margin-bottom: 10px; }
+        .admin-list { max-height: 150px; overflow-y: auto; font-size: 13px; background-color: var(--bg-dark); padding: 10px; border-radius: 4px; }
+        .admin-list div { padding: 5px; border-bottom: 1px dashed #333; display: flex; justify-content: space-between; }
         .admin-list div:last-child { border: none; }
         .role-admin { color: var(--admin-color); }
         .role-mod { color: var(--mod-color); }
         .role-banned { color: var(--danger); text-decoration: line-through; }
-
-        .admin-btn {
-            display: block;
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 5px;
-            border: 1px solid #444;
-            background-color: #222;
-            color: white;
-            border-radius: 4px;
-            cursor: pointer;
-            text-align: left;
-        }
+        .admin-btn { display: block; width: 100%; padding: 8px; margin-bottom: 5px; border: 1px solid #444; background-color: #222; color: white; border-radius: 4px; cursor: pointer; text-align: left; }
         .admin-btn:hover { background-color: #333; }
 
         /* =============== ОСНОВНОЙ КОНТЕНТ =============== */
@@ -188,7 +151,7 @@
             width: 100%;
             max-width: 800px;
             margin: 0 auto;
-            background-color: #0d1b2a;
+            background-color: var(--bg-dark);
             border: 1px solid #444;
             border-radius: 8px;
             height: 70vh;
@@ -198,76 +161,21 @@
             box-sizing: border-box;
             overflow: hidden;
         }
-        .chat-messages {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding-right: 10px;
-            margin-bottom: 15px;
-        }
-        .message {
-            margin-bottom: 10px;
-            padding: 8px 12px;
-            border-radius: 15px;
-            background-color: #162535;
-            max-width: 80%;
-            line-height: 1.4;
-            position: relative;
-        }
-        .message.self {
-            background-color: #007bff;
-            align-self: flex-end;
-            margin-left: auto;
-        }
+        .chat-messages { flex-grow: 1; overflow-y: auto; padding-right: 10px; margin-bottom: 15px; }
+        .message { margin-bottom: 10px; padding: 8px 12px; border-radius: 15px; background-color: #162535; max-width: 80%; line-height: 1.4; position: relative; }
+        .message.self { background-color: #007bff; align-self: flex-end; margin-left: auto; }
         .message.admin { border-left: 3px solid var(--admin-color); }
         .message.mod { border-left: 3px solid var(--mod-color); }
         .message.banned { background-color: #330000; color: #888; }
-        .message .meta {
-            font-size: 11px;
-            color: #888;
-            margin-bottom: 4px;
-        }
+        .message .meta { font-size: 11px; color: #888; margin-bottom: 4px; }
         .message.self .meta { color: #cce5ff; }
-        .chat-input-area {
-            display: flex;
-            gap: 10px;
-            border-top: 1px solid #333;
-            padding-top: 15px;
-        }
-        .chat-input-area input {
-            flex-grow: 1;
-            padding: 12px;
-            background-color: #222;
-            border: 1px solid #444;
-            color: white;
-            border-radius: 4px;
-        }
-        .chat-input-area button {
-            padding: 0 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .chat-input-area input:disabled {
-            background-color: #333;
-            color: #666;
-            cursor: not-allowed;
-        }
+        .chat-input-area { display: flex; gap: 10px; border-top: 1px solid #333; padding-top: 15px; }
+        .chat-input-area input { flex-grow: 1; padding: 12px; background-color: #222; border: 1px solid #444; color: white; border-radius: 4px; }
+        .chat-input-area button { padding: 0 20px; background-color: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .chat-input-area input:disabled { background-color: #333; color: #666; cursor: not-allowed; }
 
-        .profile-section {
-            width: 100%;
-            max-width: 600px;
-            margin: 0 auto;
-            display: none;
-        }
-        .profile-info {
-            border: 1px solid #444;
-            padding: 20px;
-            border-radius: 8px;
-            background-color: #0d1b2a;
-            margin-top: 30px;
-        }
+        .profile-section { width: 100%; max-width: 600px; margin: 0 auto; display: none; }
+        .profile-info { border: 1px solid #444; padding: 20px; border-radius: 8px; background-color: var(--bg-dark); margin-top: 30px; }
 
         /* =============== АНИМАЦИИ И УВЕДОМЛЕНИЯ =============== */
         .auth-overlay {
@@ -282,16 +190,22 @@
             align-items: center;
             z-index: 6000;
             display: none;
+            opacity: 0;
+            transition: opacity 0.2s;
         }
+        .auth-overlay.show { opacity: 1; }
         .auth-box {
-            background-color: #1a1a1a;
+            background-color: var(--bg-panel);
             padding: 30px;
             border-radius: 8px;
             width: 90%;
             max-width: 400px;
             position: relative;
             text-align: center;
+            transform: scale(0.9);
+            transition: transform 0.2s;
         }
+        .auth-overlay.show .auth-box { transform: scale(1); }
         .close-auth {
             position: absolute;
             top: 10px;
@@ -303,8 +217,10 @@
             cursor: pointer;
         }
         .auth-box h2 { margin-top: 0; }
+        .form-group { margin-bottom: 15px; text-align: left; }
+        .form-group label { display: block; margin-bottom: 5px; }
+        .form-group input { width: 100%; padding: 10px; background-color: #222; border: 1px solid #444; color: white; border-radius: 4px; }
 
-        /* Toasts (Уведомления) */
         .toast-container {
             position: fixed;
             top: 20px;
@@ -330,12 +246,7 @@
         .toast.error { background-color: var(--danger); }
         .toast.info { background-color: var(--primary); }
 
-        /* Эмодзи */
-        .emoji {
-            font-size: 48px;
-            display: inline-block;
-            user-select: none;
-        }
+        .emoji { font-size: 48px; display: inline-block; user-select: none; }
         .emoji-static { animation: float 4s ease-in-out infinite; }
         .emoji-moving { animation: float 3s ease-in-out infinite, spin 5s linear infinite; }
         @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-20px); } }
@@ -353,10 +264,10 @@
                 <li class="nav-item">Сообщество</li>
                 <li class="nav-item">Просмотр</li>
                 <li class="nav-item">Инструменты</li>
-                <li class="nav-item" id="adminMenuBtn">Другое</li>
             </ul>
         </nav>
         <div class="user-panel">
+            <span class="admin-icon" id="adminMenuBtn" title="Админ-панель">⚙️</span>
             <a href="#" id="authBtn" class="auth-btn">Войти</a>
             <a href="#" id="nicknameLink" class="nickname-display hidden"></a>
             <a href="#" id="logoutBtn" class="logout-btn hidden">Выйти</a>
@@ -456,7 +367,6 @@
                 <h2>Регистрация</h2>
                 <form id="regForm">
                     <div class="form-group"><label for="regNick">Никнейм:</label><input type="text" id="regNick" required></div>
-                    <div class="form-group"><label for="regEmail">Email:</label><input type="email" id="regEmail" required></div>
                     <div class="form-group"><label for="regPass">Пароль:</label><input type="password" id="regPass" required></div>
                     <button type="submit">Зарегистрироваться</button>
                 </form>
@@ -465,7 +375,7 @@
             <div id="loginForm" class="hidden">
                 <h2>Вход</h2>
                 <form id="logForm">
-                    <div class="form-group"><label for="logEmail">Email:</label><input type="email" id="logEmail" required></div>
+                    <div class="form-group"><label for="logNick">Имя пользователя:</label><input type="text" id="logNick" required></div>
                     <div class="form-group"><label for="logPass">Пароль:</label><input type="password" id="logPass" required></div>
                     <button type="submit">Войти</button>
                 </form>
@@ -481,7 +391,7 @@
         let chatHistory = JSON.parse(localStorage.getItem('chessfluxChat')) || [];
         let currentView = localStorage.getItem('chessfluxView') || 'chat';
 
-        /* БАЗЫ ДАННЫХ В ПАМЯТИ */
+        /* БАЗЫ ДАННЫХ (без Email) */
         let db = JSON.parse(localStorage.getItem('chessfluxDB')) || {
             users: {}, 
             admins: ['chessflux'], 
@@ -504,24 +414,21 @@
         const adminPanel = document.getElementById('adminPanel');
         const adminMenuBtn = document.getElementById('adminMenuBtn');
 
-        /* =============== УВЕДОМЛЕНИЯ (TOAST) =============== */
+        /* =============== УВЕДОМЛЕНИЯ =============== */
         function showToast(message, type = 'info') {
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
             toast.innerText = message;
             document.getElementById('toastContainer').appendChild(toast);
             toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
+            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3000);
         }
 
-        /* =============== АВТОРИЗАЦИЯ =============== */
-        authBtn.onclick = function(e) { e.preventDefault(); showAuthForm('login'); authOverlay.style.display = 'flex'; };
-        closeAuthBtn.onclick = function() { authOverlay.style.display = 'none'; };
-        document.getElementById('toRegister').onclick = function(e) { e.preventDefault(); showAuthForm('register'); };
-        document.getElementById('toLogin').onclick = function(e) { e.preventDefault(); showAuthForm('login'); };
+        /* =============== АВТОРИЗАЦИЯ (БЕЗ EMAIL) =============== */
+        authBtn.onclick = function(e) { e.preventDefault(); showAuthForm('login'); authOverlay.classList.add('show'); };
+        closeAuthBtn.onclick = function() { authOverlay.classList.remove('show'); };
+        document.getElementById('toRegister').onclick = function(e) { e.preventDefault(); showAuthForm('register'); authOverlay.classList.add('show'); };
+        document.getElementById('toLogin').onclick = function(e) { e.preventDefault(); showAuthForm('login'); authOverlay.classList.add('show'); };
 
         function showAuthForm(type) {
             document.getElementById('registerForm').classList.add('hidden');
@@ -533,48 +440,45 @@
         document.getElementById('regForm').onsubmit = function(e) {
             e.preventDefault();
             const nick = document.getElementById('regNick').value.toLowerCase();
-            const email = document.getElementById('regEmail').value;
             const pass = document.getElementById('regPass').value;
 
-            if (db.users[nick]) { showToast('Никнейм занят', 'error'); return; }
+            if (db.users[nick]) { 
+                showToast('Этот никнейм уже занят. Попробуйте войти.', 'error'); 
+                return; 
+            }
+            if (pass.length < 4) { showToast('Пароль слишком короткий.', 'error'); return; }
             
-            db.users[nick] = { email: email, password: pass };
+            db.users[nick] = { password: pass };
             db.registerDates[nick] = new Date().toISOString();
             localStorage.setItem('chessfluxDB', JSON.stringify(db));
 
             const user = { nick: nick, isAdmin: db.admins.includes(nick), isMod: db.mods.includes(nick) };
             localStorage.setItem('chessfluxUser', JSON.stringify(user));
             
-            authOverlay.style.display = 'none';
-            showToast(`Добро пожаловать, ${nick}!`, 'success');
+            authOverlay.classList.remove('show');
+            showToast(`Аккаунт "${nick}" создан!`, 'success');
             updateUIAfterAuth(user);
         };
 
         document.getElementById('logForm').onsubmit = function(e) {
             e.preventDefault();
-            const email = document.getElementById('logEmail').value;
+            const nick = document.getElementById('logNick').value.toLowerCase();
             const pass = document.getElementById('logPass').value;
-            const userData = localStorage.getItem('chessfluxUser');
             
-            if (userData) {
-                const user = JSON.parse(userData);
-                const dbUser = db.users[user.nick];
-                
-                if (user.isAdmin) {
-                    if (dbUser.email === email && pass === ADMIN_PASSWORD) {
-                        authOverlay.style.display = 'none';
-                        showToast('Вход выполнен (Админ)', 'success');
-                        updateUIAfterAuth(user);
-                    } else { showToast('Неверный пароль Создателя.', 'error'); }
-                } else {
-                    if (dbUser.email === email && dbUser.password === pass) {
-                        authOverlay.style.display = 'none';
-                        showToast('Вход выполнен', 'success');
-                        updateUIAfterAuth(user);
-                    } else { showToast('Неверный email или пароль.', 'error'); }
-                }
+            const dbUser = db.users[nick];
+            if (!dbUser) { showToast('Пользователь не найден. Сначала зарегистрируйтесь.', 'error'); return; }
+
+            const isCreator = (nick === 'chessflux' && pass === ADMIN_PASSWORD);
+            const isNormal = (dbUser.password === pass);
+
+            if (isCreator || isNormal) {
+                const user = { nick: nick, isAdmin: db.admins.includes(nick), isMod: db.mods.includes(nick) };
+                localStorage.setItem('chessfluxUser', JSON.stringify(user));
+                authOverlay.classList.remove('show');
+                showToast('Добро пожаловать!', 'success');
+                updateUIAfterAuth(user);
             } else {
-                showToast('Сначала нужно зарегистрироваться.', 'error');
+                showToast('Неверный пароль.', 'error');
             }
         };
 
@@ -676,7 +580,7 @@
             
             const user = JSON.parse(userData);
             if (db.banned.includes(user.nick.toLowerCase())) { 
-                showToast('Вы забанены и не можете писать в чат.', 'error'); 
+                showToast('Вы забанены.', 'error'); 
                 chatInput.disabled = true; 
                 return; 
             }

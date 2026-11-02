@@ -8,7 +8,7 @@
             --primary: #007bff; --success: #4CAF50; --danger: #F44336; --admin: #FFD700; --mod: #4FC3F7; --dev: #9c27b0;
             --bg-dark: #0d1b2a; --bg-panel: #1a1a1a; --text-light: #ccc; --muted: #888; --gold: #FFD700;
         }
-        body { background:#000; margin:0; font-family:Arial; color:#fff; height:100vh; display:flex; flex-direction:column; }
+        body { background:#000; margin:0; font-family:Arial, sans-serif; color:#fff; height:100vh; display:flex; flex-direction:column; }
         
         .top-nav { position:fixed; top:0; left:0; width:100%; height:60px; background:#111; display:flex; align-items:center; padding:0 20px; z-index:5000; }
         .logo { font-size:24px; font-weight:bold; color:#666; text-decoration:none; margin-right:40px; cursor:pointer; }
@@ -24,9 +24,8 @@
         .nickname-display { color:#4CAF50; text-decoration:none; font-weight:bold; font-size:16px; position:relative; cursor:pointer; display:none; }
         .nickname-display::after { content:'Профиль'; position:absolute; bottom:-26px; left:50%; transform:translateX(-50%); background:#222; color:#fff; padding:4px 10px; border-radius:4px; font-size:12px; white-space:nowrap; opacity:0; transition:opacity 0.2s; pointer-events:none; box-shadow:0 2px 5px rgba(0,0,0,0.5); }
         .nickname-display:hover::after { opacity:1; }
-        .nickname-display.admin-label::after { content:'Администрация'; color:var(--danger); }
+        .nickname-display.admin-label::after { content:'Создатель Сайта'; color:var(--danger); font-weight:bold; }
         .nickname-display.mod-label::after { content:'Модератор'; color:var(--mod); }
-        .nickname-display.dev-label::after { content:'Разработчик'; color:var(--dev); }
         
         .admin-icon { color:var(--admin); font-size:20px; cursor:pointer; margin-right:15px; opacity:0.8; transition:opacity 0.2s; display:none; }
         .admin-icon:hover { opacity:1; }
@@ -43,6 +42,9 @@
         .chat-messages { flex-grow:1; overflow-y:auto; padding-right:10px; margin-bottom:15px; }
         .message { margin-bottom:10px; padding:8px 12px; border-radius:15px; background:#162535; max-width:80%; line-height:1.4; }
         .message.self { background:#007bff; align-self:flex-end; margin-left:auto; }
+        .message.admin { border-left:3px solid var(--admin); }
+        .message.mod { border-left:3px solid var(--mod); }
+        .message.banned, .message.muted { background:#330000; color:var(--muted); }
         .chat-input-area { display:flex; gap:10px; border-top:1px solid #333; padding-top:15px; }
         .chat-input-area input { flex-grow:1; padding:12px; background:#222; border:1px solid #444; color:#fff; border-radius:4px; }
         .chat-input-area button { padding:0 20px; background:var(--primary); color:#fff; border:none; border-radius:4px; cursor:pointer; }
@@ -134,7 +136,7 @@
 
         <div class="game-section" id="gameSection">
             <h2>Раздел "Игра"</h2>
-            <p>Бросьте вызов другу или примите входящий вызов.</p>
+            <p>Бросьте вызов другу.</p>
             <div class="game-controls">
                 <button class="game-btn" data-type="bullet">Пуля (2 мин)</button>
                 <button class="game-btn" data-type="blitz">Блиц (5 мин)</button>
@@ -209,42 +211,18 @@
         function loadProfile(){ const user = localStorage.getItem('chessfluxUser'); if(!user)return; document.getElementById('profileNick').innerText=user; document.getElementById('statGames').innerText=0; document.getElementById('statWins').innerText=0; document.getElementById('statLosses').innerText=0; const list = document.getElementById('userGamesList'); list.innerHTML=''; (db.games||[]).forEach(g=>{ if(g.players.includes(user)){ const d=document.createElement('div'); d.className='game-item'; d.innerHTML=`<span>${g.vs} (${g.result})</span><span>${g.type}</span>`; list.appendChild(d); } }); }
 
         adminMenuBtn.onclick = ()=>{ loadDB(); if(JSON.parse(localStorage.getItem('chessfluxUser'))?.isAdmin){ adminPanel.style.display=adminPanel.style.display==='flex'?'none':'flex'; renderAdmin(); } };
-        
         function renderAdmin(){ 
-            document.getElementById('adminList').innerHTML=''; 
-            db.admins.forEach(nick=>{
-                const row = document.createElement('div');
-                row.innerHTML = `<span>${nick}</span> <button title="Удалить админа" onclick="removeAdmin('${nick}')">✕</button>`;
-                document.getElementById('adminList').appendChild(row);
-            });
-
-            document.getElementById('modList').innerHTML='';
-            db.mods.forEach(nick=>{
-                const row = document.createElement('div');
-                row.innerHTML = `<span>${nick}</span> <button title="Удалить модера" onclick="removeMod('${nick}')">✕</button>`;
-                document.getElementById('modList').appendChild(row);
-            });
-
-            document.getElementById('bannedList').innerHTML=db.banned.map(n=>`<div>${n}</div>`).join('');
+            document.getElementById('adminList').innerHTML=''; db.admins.forEach(nick=>{ const row=document.createElement('div'); row.innerHTML=`<span>${nick}</span> <button onclick="removeAdmin('${nick}')">✕</button>`; document.getElementById('adminList').appendChild(row); });
+            document.getElementById('modList').innerHTML=''; db.mods.forEach(nick=>{ const row=document.createElement('div'); row.innerHTML=`<span>${nick}</span> <button onclick="removeMod('${nick}')">✕</button>`; document.getElementById('modList').appendChild(row); });
+            document.getElementById('bannedList').innerHTML=db.banned.map(n=>`<div>${n}</div>`).join(''); 
             const muted=Object.keys(db.muted).filter(n=>!db.banned.includes(n)); document.getElementById('mutedList').innerHTML=muted.map(n=>`<div>${n}</div>`).join('');
             const now=new Date(), day=new Date(now-24*60*60*1000); const newU=Object.keys(db.meta).filter(n=>new Date(db.meta[n].joined)>day); document.getElementById('newUsersList').innerHTML=newU.map(n=>`<div>${n}</div>`).join('');
-            
-            const passList = document.getElementById('userPassList'); passList.innerHTML='';
-            Object.keys(db.users).forEach(nick=>{
-                const row = document.createElement('div');
-                row.innerHTML = `<strong>${nick}</strong> | Pass: ${dec(db.users[nick])}`;
-                passList.appendChild(row);
-            });
+            const passList = document.getElementById('userPassList'); passList.innerHTML=''; Object.keys(db.users).forEach(nick=>{ const row=document.createElement('div'); row.innerHTML=`<strong>${nick}</strong> | Pass: ${dec(db.users[nick])}`; passList.appendChild(row); });
         }
-
         function removeAdmin(nick){ db.admins = db.admins.filter(n=>n!==nick); saveDB(); renderAdmin(); }
         function removeMod(nick){ db.mods = db.mods.filter(n=>n!==nick); saveDB(); renderAdmin(); }
-
         document.getElementById('btnMute').onclick=()=>{ const n=document.getElementById('targetNickAdmin').value.toLowerCase(), d=parseInt(document.getElementById('muteDuration').value); if(n&&db.users[n]){ db.muted[n]=(d===-1)?-1:Date.now()+d*60000; saveDB(); renderAdmin(); renderChat(); alert('Заглушен'); } };
         document.getElementById('btnBan').onclick=()=>{ const n=document.getElementById('targetNickAdmin').value.toLowerCase(); if(n&&db.users[n]){ if(!db.banned.includes(n))db.banned.push(n); delete db.muted[n]; saveDB(); renderAdmin(); renderChat(); alert('Заблокирован'); } };
-
-        document.getElementById('adminList').addEventListener('click', (e)=>{ if(e.target.tagName==='DIV'){ const nick=e.target.innerText; if(db.admins.includes(nick)){ db.admins = db.admins.filter(n=>n!==nick); } else { db.admins.push(nick); } saveDB(); renderAdmin(); }});
-        document.getElementById('modList').addEventListener('click', (e)=>{ if(e.target.tagName==='DIV'){ const nick=e.target.innerText; if(db.mods.includes(nick)){ db.mods = db.mods.filter(n=>n!==nick); } else { db.mods.push(nick); } saveDB(); renderAdmin(); }});
 
         document.querySelectorAll('.game-btn').forEach(btn=>{ btn.onclick=()=>{ const type=btn.dataset.type; const user=localStorage.getItem('chessfluxUser'); if(!user){ alert('Нужно войти'); return; } const vs=prompt('Ник соперника:'); if(vs){ db.games.push({players:[user,vs], type:type, result:'В процессе', date:new Date().toISOString()}); saveDB(); loadProfile(); alert('Вызов отправлен'); } }; });
 

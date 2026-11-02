@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>ChessFlux</title>
+    <style>
+        body {
+            background-color: #000000;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            color: #FFFFFF;
+        }
+
+        /* НОВАЯ ВЕРХНЯЯ ПАНЕЛЬ */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background-color: #111;
+            border-bottom: 1px solid #333;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            box-sizing: border-box;
+            z-index: 5000;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #666;
+            text-decoration: none;
+            margin-right: 40px;
+        }
+        .logo:hover {
+            color: #fff;
+        }
+        .nav-menu {
+            display: flex;
+            gap: 25px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        .nav-item {
+            color: #ccc;
+            text-decoration: none;
+            font-size: 15px;
+            transition: color 0.2s;
+        }
+        .nav-item:hover {
+            color: #fff;
+            cursor: default; /* Курсор обычный, так как функций нет */
+        }
+        .user-panel {
+            margin-left: auto;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        .auth-btn, .logout-btn {
+            background-color: #444;
+            color: white;
+            border: 1px solid #666;
+            padding: 5px 12px;
+            text-decoration: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .auth-btn:hover {
+            background-color: #555;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+            padding-top: 100px; /* Отступ для контента, чтобы не заезжал под панель */
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            background-color: #222;
+            border: 1px solid #444;
+            color: white;
+            border-radius: 4px;
+        }
+        button[type="submit"] {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .profile-info {
+            border: 1px solid #444;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #0d1b2a;
+            margin-top: 30px;
+        }
+        .hidden {
+            display: none;
+        }
+
+        .games-list {
+            text-align: left;
+            margin-top: 20px;
+            border-top: 1px solid #444;
+            padding-top: 20px;
+        }
+        .game-item {
+            padding: 8px 0;
+            border-bottom: 1px dashed #333;
+            display: flex;
+            justify-content: space-between;
+        }
+        .game-win { color: #4CAF50; }
+        .game-loss { color: #F44336; }
+        .no-games { color: #888; font-style: italic; }
+
+        .emoji {
+            font-size: 48px;
+            display: inline-block;
+            user-select: none;
+        }
+        .emoji-static {
+            animation: float 4s ease-in-out infinite;
+        }
+        .emoji-moving {
+            animation: float 3s ease-in-out infinite, spin 5s linear infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- НОВАЯ ВЕРХНЯЯ ПАНЕЛЬ -->
+    <div class="top-nav">
+        <a href="#" class="logo">♟ ChessFlux</a>
+        <nav>
+            <ul class="nav-menu">
+                <li class="nav-item">Игра</li>
+                <li class="nav-item">Задачи</li>
+                <li class="nav-item">Сообщество</li>
+                <li class="nav-item">Просмотр</li>
+                <li class="nav-item">Инструменты</li>
+                <li class="nav-item">Другое</li>
+            </ul>
+        </nav>
+        <div class="user-panel">
+            <a href="#" id="loginBtn" class="auth-btn">Войти</a>
+            <a href="#" id="registerBtn" class="auth-btn">Регистрация</a>
+            <a href="#" id="logoutBtn" class="logout-btn hidden">Выйти</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>Шахматный клуб</h1>
+        <p>Добро пожаловать. Здесь мы учимся играть в шахматы, разбираем партии и общаемся.</p>
+
+        <div id="authForms" class="hidden">
+            <div id="registerForm">
+                <h2>Регистрация</h2>
+                <form id="regForm">
+                    <div class="form-group">
+                        <label for="regNick">Никнейм:</label>
+                        <input type="text" id="regNick" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="regEmail">Email:</label>
+                        <input type="email" id="regEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="regPass">Пароль:</label>
+                        <input type="password" id="regPass" required>
+                    </div>
+                    <button type="submit">Зарегистрироваться</button>
+                </form>
+                <p><a href="#" id="toLogin">Уже есть аккаунт? Войти</a></p>
+            </div>
+
+            <div id="loginForm" class="hidden">
+                <h2>Вход</h2>
+                <form id="logForm">
+                    <div class="form-group">
+                        <label for="logEmail">Email:</label>
+                        <input type="email" id="logEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="logPass">Пароль:</label>
+                        <input type="password" id="logPass" required>
+                    </div>
+                    <button type="submit">Войти</button>
+                </form>
+                <p><a href="#" id="toRegister">Нет аккаунта? Зарегистрироваться</a></p>
+            </div>
+        </div>
+
+        <div id="profileSection" class="hidden">
+            <h2>Ваш профиль</h2>
+            <div class="profile-info">
+                <h3 id="profileNick"></h3>
+                <p><strong>Статистика:</strong></p>
+                <p>Сыграно партий: <span id="statGames">0</span></p>
+                <p>Побед: <span id="statWins">0</span></p>
+                <p>Поражений: <span id="statLosses">0</span></p>
+
+                <hr>
+                <h3>Редактировать профиль</h3>
+                <form id="editForm">
+                    <div class="form-group">
+                        <label for="bioText">О себе (до 400 символов):</label>
+                        <textarea id="bioText" maxlength="400" rows="4" placeholder="Расскажите о своем любимом дебюте..."></textarea>
+                        <small>Осталось: <span id="charCount">400</span> символов</small>
+                    </div>
+                    <button type="submit">Сохранить описание</button>
+                </form>
+                <p id="bioDisplay" style="margin-top: 15px; font-style: italic; color: #ccc; min-height: 40px;"></p>
+
+                <hr>
+                <h3>Ваши партии</h3>
+                <button id="viewGamesBtn" style="background-color: #6f42c1; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 15px;">
+                    Посмотреть список партий
+                </button>
+
+                <div id="gamesContainer" class="hidden games-list">
+                    <div id="gamesList"></div>
+                </div>
+
+                <hr>
+                <h3>Фигуры в движении &#9919;</h3>
+                <div style="font-size: 64px; margin: 20px 0;">
+                    <span class="emoji emoji-static">♔</span>
+                    <span class="emoji emoji-moving">♕</span>
+                    <span class="emoji emoji-static">♖</span>
+                    <span class="emoji emoji-moving">♘</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ADMIN_PASSWORD = 'SaakyanArtur555';
+
+        window.onload = function() {
+            const userData = localStorage.getItem('chessfluxUser');
+            if (userData) {
+                try {
+                    const user = JSON.parse(userData);
+                    showProfile(user);
+                } catch (e) {
+                    localStorage.removeItem('chessfluxUser');
+                }
+            }
+            updateCharCount();
+        };
+
+        const authForms = document.getElementById('authForms');
+        const registerForm = document.getElementById('registerForm');
+        const loginForm = document.getElementById('loginForm');
+        const profileSection = document.getElementById('profileSection');
+
+        const loginBtn = document.getElementById('loginBtn');
+        const registerBtn = document.getElementById('registerBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        registerBtn.onclick = function(e) {
+            e.preventDefault();
+            authForms.classList.remove('hidden');
+            registerForm.classList.remove('hidden');
+            loginForm.classList.add('hidden');
+        };
+
+        loginBtn.onclick = function(e) {
+            e.preventDefault();
+            authForms.classList.remove('hidden');
+            loginForm.classList.remove('hidden');
+            registerForm.classList.add('hidden');
+        };
+
+        document.getElementById('toRegister').onclick = function(e) {
+            e.preventDefault();
+            registerForm.classList.remove('hidden');
+            loginForm.classList.add('hidden');
+        };
+
+        document.getElementById('toLogin').onclick = function(e) {
+            e.preventDefault();
+            loginForm.classList.remove('hidden');
+            registerForm.classList.add('hidden');
+        };
+
+        document.getElementById('regForm').onsubmit = function(e) {
+            e.preventDefault();
+            const nick = document.getElementById('regNick').value;
+            const email = document.getElementById('regEmail').value;
+            const pass = document.getElementById('regPass').value;
+
+            const user = {
+                nick: nick,
+                email: email,
+                password: pass,
+                games: 0,
+                wins: 0,
+                losses: 0,
+                bio: "",
+                history: [],
+                isAdmin: (nick.toLowerCase() === 'chessflux')
+            };
+
+            localStorage.setItem('chessfluxUser', JSON.stringify(user));
+            showProfile(user);
+        };
+
+        document.getElementById('logForm').onsubmit = function(e) {
+            e.preventDefault();
+            const email = document.getElementById('logEmail').value;
+            const pass = document.getElementById('logPass').value;
+
+            const userData = localStorage.getItem('chessfluxUser');
+            if (userData) {
+                const user = JSON.parse(userData);
+                if (user.isAdmin) {
+                    if (user.email === email && pass === ADMIN_PASSWORD) {
+                        showProfile(user);
+                    } else {
+                        alert('Неверный пароль для Создателя Сайта.');
+                    }
+                } else {
+                    if (user.email === email && user.password === pass) {
+                        showProfile(user);
+                    } else {
+                        alert('Неверный email или пароль.');
+                    }
+                }
+            } else {
+                alert('Сначала нужно зарегистрировать аккаунт.');
+            }
+        };
+
+        function showProfile(user) {
+            authForms.classList.add('hidden');
+            profileSection.classList.remove('hidden');
+            loginBtn.classList.add('hidden');
+            registerBtn.classList.add('hidden');
+            logoutBtn.classList.remove('hidden');
+
+            const nickElement = document.getElementById('profileNick');
+            nickElement.innerText = user.nick;
+
+            if (user.isAdmin) {
+                const creatorSpan = document.createElement('span');
+                creatorSpan.style.color = 'orange';
+                creatorSpan.style.marginLeft = '10px';
+                creatorSpan.innerText = 'Создатель Сайта';
+                nickElement.appendChild(creatorSpan);
+            }
+
+            document.getElementById('statGames').innerText = user.games;
+            document.getElementById('statWins').innerText = user.wins;
+            document.getElementById('statLosses').innerText = user.losses;
+            
+            document.getElementById('bioText').value = user.bio || "";
+            document.getElementById('bioDisplay').innerText = user.bio || "Описание не заполнено.";
+            updateCharCount();
+        }
+
+        logoutBtn.onclick = function(e) {
+            e.preventDefault();
+            profileSection.classList.add('hidden');
+            loginBtn.classList.remove('hidden');
+            registerBtn.classList.remove('hidden');
+            logoutBtn.classList.add('hidden');
+        };
+
+        function addGameResult(result) {
+            const userData = localStorage.getItem('chessfluxUser');
+            if (userData) {
+                const user = JSON.parse(userData);
+                user.games++;
+                if (result === 'win') {
+                    user.wins++;
+                } else if (result === 'loss') {
+                    user.losses++;
+                }
+                
+                const gameRecord = {
+                    date: new Date().toLocaleString('ru-RU'),
+                    result: result
+                };
+                user.history.push(gameRecord);
+
+                localStorage.setItem('chessfluxUser', JSON.stringify(user));
+                showProfile(user);
+            }
+        }
+
+        document.getElementById('viewGamesBtn').onclick = function(e) {
+            e.preventDefault();
+            const gamesContainer = document.getElementById('gamesContainer');
+            const gamesList = document.getElementById('gamesList');
+            
+            const userData = localStorage.getItem('chessfluxUser');
+            if (userData) {
+                const user = JSON.parse(userData);
+                
+                if (user.history.length === 0) {
+                    gamesList.innerHTML = '<p class="no-games">Вы еще не сыграли ни одной партии.</p>';
+                } else {
+                    let html = '';
+                    user.history.forEach(game => {
+                        const className = game.result === 'win' ? 'game-win' : 'game-loss';
+                        const text = game.result === 'win' ? 'Победа' : 'Поражение';
+                        html += `<div class="game-item ${className}">
+                                    <span>${game.date}</span>
+                                    <span>${text}</span>
+                                </div>`;
+                    });
+                    gamesList.innerHTML = html;
+                }
+            }
+            gamesContainer.classList.remove('hidden');
+        };
+
+        document.getElementById('editForm').onsubmit = function(e) {
+            e.preventDefault();
+            const newBio = document.getElementById('bioText').value;
+            const userData = localStorage.getItem('chessfluxUser');
+            if (userData) {
+                const user = JSON.parse(userData);
+                user.bio = newBio;
+                localStorage.setItem('chessfluxUser', JSON.stringify(user));
+                document.getElementById('bioDisplay').innerText = newBio;
+                alert('Описание сохранено!');
+            }
+        };
+
+        updateCharCount();
+        function updateCharCount() {
+            const text = document.getElementById('bioText').value;
+            const length = text.length;
+            const left = 400 - length;
+            document.getElementById('charCount').innerText = left;
+        }
+    </script>
+
+</body>
+</html>
